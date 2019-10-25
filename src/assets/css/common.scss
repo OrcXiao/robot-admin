@@ -1,0 +1,252 @@
+/*
+  重置样式
+*/
+*{
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #app{
+  width: 100%;
+  height: 100%;
+  font-size: 100%;
+  box-sizing: border-box;
+}
+
+li{
+  list-style: none;
+}
+
+/*
+  公共样式
+*/
+//宽度100%
+.wd100{
+  width: 100%;
+}
+
+//高度100%
+.hg100{
+  height: 100%;
+}
+
+//圆弧4px
+.br4{
+  border-radius: 4px;
+}
+
+//文档水平对齐
+.tc{
+  text-align: center;
+}
+
+//显示手型
+.cuso{
+  cursor: pointer;
+}
+
+//改变盒子模型
+.bs{
+  box-sizing: border-box;
+}
+
+//弹性盒子模型
+.dis-fl{
+  display: -webkit-box; /* 老版本语法: Safari, iOS, Android browser, older WebKit browsers. */
+  display: -moz-box; /* 老版本语法: Firefox (buggy) */
+  display: -ms-flexbox; /* 混合版本语法: IE 10 */
+  display: -webkit-flex; /* 新版本语法: Chrome 21+ */
+  display: flex; /* 新版本语法: Opera 12.1, Firefox 22+ */
+}
+
+//两端对齐(结合上方的.dis-fl类使用)
+.ju-sb{
+  justify-content: space-between;
+}
+
+//字体加粗
+.fw{
+  font-weight: 900 !important;
+}
+
+//背景颜色
+.bkFFFFFF{
+  background: #ffffff;
+}
+
+//内边距
+.pb30{
+  padding-bottom: 30px;
+}
+
+.pb10{
+  padding-bottom: 10px;
+}
+
+.p30{
+  padding: 30px;
+}
+
+.p20{
+  padding: 20px;
+}
+
+.ptb20{
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.pl20{
+  padding-left: 20px;
+}
+
+.pr20{
+  padding-right: 20px;
+}
+
+.pl10{
+  padding-left: 10px;
+}
+
+//外边距
+.mb30{
+  margin-bottom: 30px;
+}
+
+.ml20{
+  margin-left: 20px;
+}
+
+//下边框
+.borb{
+  border-bottom: 1px solid #ebeef5;
+}
+
+//字体大小
+.fs14{
+  font-size: 14px;
+}
+
+.fs16{
+  font-size: 16px;
+}
+
+.fs18{
+  font-size: 18px;
+}
+
+.fs20{
+  font-size: 20px;
+}
+
+.fs22{
+  font-size: 22px;
+}
+
+.fs24{
+  font-size: 24px;
+}
+
+.fs26{
+  font-size: 26px;
+}
+
+.fs28{
+  font-size: 28px;
+}
+
+.fs30{
+  font-size: 30px;
+}
+
+//字体颜色
+.clFF0000{
+  color: #FF0000;
+}
+
+.cl00a200{
+  color: #00a200;
+}
+
+.cl808080{
+  color: #808080;
+}
+
+.clFFFFFF{
+  color: #FFFFFF;
+}
+
+.cl4B81E2{
+  color: #4B81E2;
+}
+
+.cl9696AE{
+  color: #9696AE;
+}
+
+
+/*
+*修改element-ui样式
+*/
+
+//按钮样式
+//新增
+.el-button--primary{
+  background-color: #4B81E2;
+  border-color: #4B81E2;
+
+  &:focus,
+  &:hover{
+    background-color: #4e9bff;
+    border-color: #4e9bff;
+  }
+}
+
+//修改
+.el-button--success{
+  background-color: #1192f0;
+  border-color: #1192f0;
+
+  &:focus,
+  &:hover{
+    background-color: #119eff;
+    border-color: #119eff;
+  }
+}
+
+//查看
+.el-button--warning{
+  background-color: #43c1ea;
+  border-color: #43c1ea;
+
+  &:focus,
+  &:hover{
+    background-color: #49d5ff;
+    border-color: #49d5ff;
+  }
+}
+
+//功能
+.el-button--info{
+  background-color: #ffd058;
+  border-color: #ffd058;
+
+  &:focus,
+  &:hover{
+    background-color: rgba(255, 208, 88, 0.69);
+    border-color: rgba(255, 208, 88, 0.69);
+  }
+}
+
+/*表格分页器*/
+.el-pagination{
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 30px;
+}
+
+/*文本向右对齐*/
+.text-right{
+  display: flex;
+  justify-content: flex-end;
+}

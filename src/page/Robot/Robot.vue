@@ -1,0 +1,305 @@
+<template>
+  <div class="bkFFFFFF p30 robot-wrap">
+    <div class="pb30">
+      <span class="pr20">交易所 :</span>
+      <el-input
+        style="width: 150px;"
+        class="pr20"
+        placeholder="请输入交易所">
+      </el-input>
+      <el-button>搜索</el-button>
+      <el-button
+        @click="clickAddBtn"
+        icon="el-icon-circle-plus-outline"
+        type="primary">添加机器人
+      </el-button>
+    </div>
+    <el-table
+      border
+      :data="tableData"
+      style="width: 100%">
+      <el-table-column
+        label="序号"
+        type="index"
+        width="50"
+        align="center">
+      </el-table-column>
+      <el-table-column
+        prop="date"
+        label="机器人">
+      </el-table-column>
+      <el-table-column
+        prop="name"
+        label="交易所">
+      </el-table-column>
+      <el-table-column
+        prop="name"
+        label="策略">
+      </el-table-column>
+      <el-table-column
+        prop="name"
+        label="止盈出场">
+      </el-table-column>
+      <el-table-column
+        prop="name"
+        label="停止补仓">
+      </el-table-column>
+      <el-table-column
+        prop="name"
+        label="状态">
+      </el-table-column>
+      <el-table-column
+        width="420"
+        label="操作">
+        <template slot-scope="scope">
+          <el-button
+            @click="clickEditBtn(scope.row)"
+            icon="el-icon-edit"
+            type="success">修改
+          </el-button>
+          <el-button
+            @click="clickEditBtn(scope.row)"
+            icon="el-icon-video-pause"
+            type="info">暂停
+          </el-button>
+          <el-button
+            @click="clickRemoveBtn(scope.row)"
+            icon="el-icon-circle-close"
+            type="danger">删除
+          </el-button>
+          <el-button
+            @click="clickDetailsBtn(scope.row)"
+            icon="el-icon-tickets"
+            type="warning">详情
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <el-pagination
+      @size-change="Mixin_handleSizeChange"
+      @current-change="Mixin_handleCurrentChange"
+      :current-page="4"
+      :page-sizes="[10, 20, 50]"
+      :page-size="10"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="70">
+    </el-pagination>
+
+    <!--添加和修改机器人弹框-->
+    <el-dialog
+      :title="currentHandleType === 'add' ? '添加机器人': '修改机器人'"
+      @close="Mixin_closeDialog('robotObj', 'isShowAddOrEditDialog')"
+      :visible.sync="isShowAddOrEditDialog"
+      :append-to-body=true
+      width="500px">
+      <el-form
+        :model="robotObj"
+        :rules="robotObjRules"
+        ref="robotObj"
+        label-position="right"
+        label-width="140px">
+        <el-form-item label="机器人名称" prop="name">
+          <el-input v-model="robotObj.name" placeholder="请输入机器人名称"></el-input>
+        </el-form-item>
+        <el-form-item label="交易所" prop="bourse">
+          <el-select style="width: 320px" v-model="robotObj.bourse" placeholder="请选择交易所">
+            <el-option
+              v-for="item in bourseOptions"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="交易区" prop="tradingRange">
+          <el-select style="width: 320px" v-model="robotObj.tradingRange" placeholder="请选择交易区">
+            <el-option
+              v-for="item in tradingRangeOptions"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="你所持有的币种" prop="coin">
+          <el-checkbox-group v-model="robotObj.coin">
+            <el-checkbox
+              v-for="item in coinOptions"
+              :key="item.id"
+              label="餐厅线上活动"
+              name="type">
+            </el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+        <el-form-item label="交易币对" prop="MoneyFor">
+          <el-checkbox-group v-model="robotObj.MoneyFor">
+            <el-checkbox
+              v-for="item in MoneyForOptions"
+              :key="item.id"
+              label="餐厅线上活动"
+              name="type">
+            </el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+        <el-form-item label="USDT本金" prop="USDT">
+          <el-input v-model="robotObj.USDT" placeholder="请输入USDT本金"></el-input>
+          <div class="text-right">
+            <div class="cuso">USDT余额:</div>
+          </div>
+        </el-form-item>
+        <el-form-item label="BTC本金" prop="BTC">
+          <el-input v-model="robotObj.BTC" placeholder="请输入BTC本金"></el-input>
+          <div class="text-right">
+            <div class="cuso">BTC余额:</div>
+          </div>
+        </el-form-item>
+        <el-form-item label="ETH本金" prop="ETH">
+          <el-input v-model="robotObj.ETH" placeholder="请输入ETH本金"></el-input>
+          <div class="text-right">
+            <div class="cuso">ETH余额:</div>
+          </div>
+        </el-form-item>
+        <el-form-item label="策略" prop="tactics">
+          <el-select style="width: 320px" v-model="robotObj.tactics" placeholder="请选择策略">
+            <el-option
+              v-for="item in tacticsOptions"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id">
+            </el-option>
+          </el-select>
+          <div class="text-right">
+            <div class="cuso"><i class="el-icon-question"></i>自定义策略</div>
+          </div>
+        </el-form-item>
+
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+		    <el-button @click="isShowAddOrEditDialog = false">取 消</el-button>
+		    <el-button type="primary" @click="submitAdd('robotObj')" v-if="currentHandleType==='add'">确 定</el-button>
+		    <el-button type="primary" @click="submitEdit('robotObj')" v-if="currentHandleType==='edit'">保 存</el-button>
+		  </span>
+    </el-dialog>
+  </div>
+</template>
+
+<script>
+  export default {
+    name: "Robot",
+    data(){
+      return {
+        tableData: [
+          {
+            date: '2016-05-02',
+            name: '王小虎',
+            address: '上海市'
+          }, {
+            date: '2016-05-04',
+            name: '王小虎',
+            address: '上海市'
+          }, {
+            date: '2016-05-01',
+            name: '王小虎',
+            address: '上海市'
+          }, {
+            date: '2016-05-03',
+            name: '王小虎',
+            address: '上海市'
+          }
+        ],
+        //是否显示弹框
+        isShowAddOrEditDialog: false,
+        //当前操作类型
+        currentHandleType: '',
+        //交易所候选项数组
+        bourseOptions: [],
+        //交易区候选项数组
+        tradingRangeOptions: [],
+        //币种候选项数组
+        coinOptions: [],
+        //交易币对候选项数组
+        MoneyForOptions: [],
+        //策略候选项数组
+        tacticsOptions: [],
+        //机器人obj
+        robotObj: {
+          //机器人名称
+          name: '',
+          //交易所
+          bourse: '',
+          //交易区
+          tradingRange: '',
+          //所持有的币种
+          coin: '',
+          //交易币对
+          MoneyFor: '',
+          //USDT
+          USDT: '',
+          //BTC
+          BTC: '',
+          //ETH
+          ETH: '',
+          //策略
+          tactics: '',
+        },
+        //机器人属性的校验
+        robotObjRules: {}
+
+      }
+    },
+    computed: {},
+    created(){
+    },
+    mounted(){
+      //this.$ nextTick(() => {
+
+      //})
+    },
+    methods: {
+
+      //点击'添加'
+      clickAddBtn(){
+        this.currentHandleType = 'add';
+        this.isShowAddOrEditDialog = true;
+      },
+
+      //提交新增
+      submitAdd(formName){
+        this.$refs[formName].validate((valid) => {
+          if(!valid){
+            return false;
+          }
+          else{
+
+          }
+        })
+      },
+
+      //提交修改
+      submitEdit(formName){
+        this.$refs[formName].validate((valid) => {
+          if(!valid){
+            return false;
+          }
+          else{
+
+          }
+        })
+      },
+
+      //点击添加详情
+      clickDetailsBtn(row){
+        this.$router.push('/RobotDetails/123');
+      },
+    },
+    props: {},
+    watch: {},
+    mixins: [],
+    filters: {},
+    components: {},
+  }
+</script>
+
+<style scoped>
+
+</style>
