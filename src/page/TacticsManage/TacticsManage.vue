@@ -88,52 +88,90 @@
     <!--添加自定义策略弹框-->
     <el-dialog
       title="添加自定义策略"
+      class="tactics-dialog-wrap"
       @close="Mixin_closeDialog('tacticsObj', 'isShowAddTacticsDialog')"
       :visible.sync="isShowAddTacticsDialog"
-      :append-to-body=true
-      width="500px">
+      :width="widthVal + 'px'">
       <el-form
         :model="tacticsObj"
         :rules="tacticsObjRules"
         ref="tacticsObj"
         label-position="right"
         label-width="140px">
-        <el-form-item label="止盈比例" prop="CheckSurplusProportion">
+        <el-form-item label="止盈比例 ( % ) :" prop="ZhiYingBiLiArr">
           <div class="dis-fl">
             <el-input
-              style="width: 250px;"
-              v-model="tacticsObj.CheckSurplusProportion"
-              placeholder="请输入止盈比例">
+              v-for="(item, index) in ZhiYingBiLiArr"
+              :key="index"
+              style="width: 100px;margin-right: 5px"
+              v-model="ZhiYingBiLiArr[index]"
+              maxlength="6"
+              @keyup.native="limitInputNum('ZhiYingBiLiArr', index, ZhiYingBiLiArr[index], 3, 2)"
+              placeholder="请输入">
+              <el-button
+                @click="removeItem(index)"
+                style="padding: 12px"
+                slot="append"
+                v-if="index > 0"
+                icon="el-icon-remove"></el-button>
             </el-input>
-            <span class="pl10">%</span>
+            <el-button
+              @click="addItem"
+              style="padding: 12px"
+              icon="el-icon-circle-plus"></el-button>
           </div>
         </el-form-item>
-        <el-form-item label="补仓比例" prop="MarginPercentage">
+        <el-form-item label="补仓比例 ( % ) :" prop="MarginPercentage">
           <div class="dis-fl">
             <el-input
-              style="width: 250px;"
-              v-model="tacticsObj.MarginPercentage"
-              placeholder="请输入补仓比例">
+              v-for="(item, index) in BuCangBiLiArr"
+              :key="index"
+              style="width: 100px;margin-right: 5px"
+              v-model="BuCangBiLiArr[index]"
+              maxlength="6"
+              placeholder="请输入">
+              <el-button
+                @click="removeItem(index)"
+                style="padding: 12px"
+                slot="append"
+                v-if="index > 0"
+                icon="el-icon-remove"></el-button>
             </el-input>
-            <span class="pl10">%</span>
+            <el-button
+              @click="addItem"
+              style="padding: 12px"
+              icon="el-icon-circle-plus"></el-button>
           </div>
         </el-form-item>
-        <el-form-item label="补仓数列" prop="CoverSeries">
+        <el-form-item label="补仓数列 ( 倍 ) :" prop="CoverSeries">
           <div class="dis-fl">
             <el-input
-              style="width: 250px;"
-              v-model="tacticsObj.CoverSeries"
-              placeholder="请输入补仓数列">
+              v-for="(item, index) in BuCangShuLieArr"
+              :key="index"
+              style="width: 100px;margin-right: 5px"
+              v-model="BuCangShuLieArr[index]"
+              maxlength="6"
+              placeholder="请输入">
+              <el-button
+                @click="removeItem(index)"
+                style="padding: 12px"
+                slot="append"
+                v-if="index > 1"
+                icon="el-icon-remove"></el-button>
             </el-input>
-            <span class="pl10">倍</span>
+            <el-button
+              @click="addItem"
+              style="padding: 12px"
+              icon="el-icon-circle-plus"></el-button>
           </div>
         </el-form-item>
-        <el-form-item label="追踪止盈">
+        <el-form-item label="追踪止盈 :">
           <el-switch v-model="tacticsObj.TrackingCheckSurplus"></el-switch>
         </el-form-item>
         <el-form-item v-if="tacticsObj.TrackingCheckSurplus" label="允许回调" prop="AllowTheCallback">
           <div class="dis-fl">
             <el-input
+              @input.native="Mixin_commonLimitInput('tacticsObj.AllowTheCallback', 3, 2)"
               style="width: 250px;"
               v-model="tacticsObj.AllowTheCallback"
               placeholder="请输入允许回调">
@@ -141,9 +179,10 @@
             <span class="pl10">%</span>
           </div>
         </el-form-item>
-        <el-form-item v-if="tacticsObj.TrackingCheckSurplus" label="横盘时间" prop="SidewaysTime">
+        <el-form-item v-if="tacticsObj.TrackingCheckSurplus" label="横盘时间 :" prop="SidewaysTime">
           <div class="dis-fl">
             <el-input
+              @keyup.native="Mixin_commonLimitInput('tacticsObj.SidewaysTime', 4, 0, false)"
               style="width: 250px;"
               v-model="tacticsObj.SidewaysTime"
               placeholder="请输入横盘时间">
@@ -151,12 +190,13 @@
             <div class="pl10" style="width: 40px">分钟</div>
           </div>
         </el-form-item>
-        <el-form-item label="防瀑布">
+        <el-form-item label="防瀑布 :">
           <el-switch v-model="tacticsObj.ToPreventFalls"></el-switch>
         </el-form-item>
-        <el-form-item v-if="tacticsObj.ToPreventFalls" label="允许回调" prop="AllowTheCallback2">
+        <el-form-item v-if="tacticsObj.ToPreventFalls" label="允许回调 :" prop="AllowTheCallback2">
           <div class="dis-fl">
             <el-input
+              @keyup.native="Mixin_limitInputNum('tacticsObj.AllowTheCallback2', 3, 2)"
               style="width: 250px;"
               v-model="tacticsObj.AllowTheCallback2"
               placeholder="请输入允许回调">
@@ -164,9 +204,10 @@
             <span class="pl10">%</span>
           </div>
         </el-form-item>
-        <el-form-item v-if="tacticsObj.ToPreventFalls" label="横盘时间" prop="SidewaysTime2">
+        <el-form-item v-if="tacticsObj.ToPreventFalls" label="横盘时间 :" prop="SidewaysTime2">
           <div class="dis-fl">
             <el-input
+              @keyup.native="Mixin_commonLimitInput('tacticsObj.SidewaysTime', 4, 0, false)"
               style="width: 250px;"
               v-model="tacticsObj.SidewaysTime2"
               placeholder="请输入横盘时间">
@@ -174,10 +215,10 @@
             <div class="pl10" style="width: 40px">分钟</div>
           </div>
         </el-form-item>
-        <el-form-item label="网格">
+        <el-form-item label="网格 :">
           <el-switch v-model="tacticsObj.Grid"></el-switch>
         </el-form-item>
-        <el-form-item v-if="tacticsObj.Grid" label="网格开启条件" prop="OpenCondition">
+        <el-form-item v-if="tacticsObj.Grid" label="网格开启条件 :" prop="OpenCondition">
           <div class="dis-fl">
             <el-select style="width: 250px;" v-model="tacticsObj.OpenCondition" placeholder="请选择网格开启条件">
               <el-option
@@ -190,7 +231,7 @@
             <span class="pl10">手</span>
           </div>
         </el-form-item>
-        <el-form-item v-if="tacticsObj.Grid" label="网格关闭条件" prop="CloseCondition">
+        <el-form-item v-if="tacticsObj.Grid" label="网格关闭条件 :" prop="CloseCondition">
           <div class="dis-fl">
             <el-select style="width: 250px;" v-model="tacticsObj.CloseCondition" placeholder="请选择网格关闭条件">
               <el-option
@@ -203,17 +244,18 @@
             <span class="pl10">手</span>
           </div>
         </el-form-item>
-        <el-form-item v-if="tacticsObj.Grid" label="网格止盈比例" prop="GridCheckSurplusProportion">
+        <el-form-item v-if="tacticsObj.Grid" label="网格止盈比例 ( % ) :" prop="CheckSurplusProportion">
           <div class="dis-fl">
             <el-input
-              style="width: 250px;"
-              v-model="tacticsObj.GridCheckSurplusProportion"
-              placeholder="请输入横盘时间">
+              v-for="(item, index) in WangGeZhiYingBiLiArr"
+              style="width: 100px;margin-right: 5px"
+              maxlength="6"
+              v-model="WangGeZhiYingBiLiArr[index]"
+              placeholder="请输入">
             </el-input>
-            <span class="pl10">%</span>
           </div>
         </el-form-item>
-        <el-form-item label="止盈出场">
+        <el-form-item label="止盈出场 :">
           <el-switch v-model="tacticsObj.CheckFullPlay"></el-switch>
         </el-form-item>
       </el-form>
@@ -230,6 +272,51 @@
   export default {
     name: "TacticsManage",
     data(){
+      let validatorZhiYingBiLiArr = (rule, value, callback, str) => {
+        let val = this.ZhiYingBiLiArr.find(item => parseFloat(item) > 999.99);
+        if(val){
+          callback(new Error('输入的最大数不能超过999.99'));
+        }
+        else{
+          callback();
+        }
+      };
+      let validatorBuCangBiLiArr = (rule, value, callback, str) => {
+        let val = this.BuCangBiLiArr.find(item => parseFloat(item) > 999.99);
+        if(val){
+          callback(new Error('输入的最大数不能超过999.99'));
+        }
+        else{
+          callback();
+        }
+      };
+      let validatorBuCangShuLieArr = (rule, value, callback, str) => {
+        let val = this.BuCangShuLieArr.find(item => parseFloat(item) > 999.99);
+        if(val){
+          callback(new Error('输入的最大数不能超过999.99'));
+        }
+        else{
+          callback();
+        }
+      };
+      let validatorWangGeZhiYingBiLiArr = (rule, value, callback, str) => {
+        let val = this.WangGeZhiYingBiLiArr.find(item => parseFloat(item) > 999.99);
+        if(val){
+          callback(new Error('输入的最大数不能超过999.99'));
+        }
+        else{
+          callback();
+        }
+      };
+      let validatorAllowTheCallback = (rule, value, callback, str) => {
+        if(!value){
+          callback(new Error('输入的最大数不能超过999.99'));
+        }
+        else{
+          callback();
+        }
+      };
+
       return {
         tableData: [
           {
@@ -239,17 +326,27 @@
           }
         ],
         //显示自定义弹框
-        isShowAddTacticsDialog: false,
+        isShowAddTacticsDialog: true,
         //网格开启或关闭条件候选项
         conditionOptions: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        //止盈比例数组
+        ZhiYingBiLiArr: [''],
+        //补仓比例数组
+        BuCangBiLiArr: [''],
+        //补仓数列数组
+        BuCangShuLieArr: ['', ''],
+        //网格止盈比例数组
+        WangGeZhiYingBiLiArr: [''],
         //自定义策略obj
         tacticsObj: {
-          //止盈比例
-          CheckSurplusProportion: '',
-          //补仓比例
-          MarginPercentage: '',
-          //补仓数列
-          CoverSeries: '',
+          /*
+           //止盈比例
+           CheckSurplusProportion: '',
+           //补仓比例
+           MarginPercentage: '',
+           //补仓数列
+           CoverSeries: '',
+           */
           //追踪止盈
           TrackingCheckSurplus: false,
           //允许回调
@@ -275,8 +372,49 @@
         },
         //策略属性校验
         tacticsObjRules: {
-
+          ZhiYingBiLiArr: [
+            {
+              required: true,
+              validator: validatorZhiYingBiLiArr,
+              trigger: 'blur'
+            }
+          ],
+          BuCangBiLiArr: [
+            {
+              required: true,
+              validator: validatorBuCangBiLiArr,
+              trigger: 'blur'
+            }
+          ],
+          BuCangShuLieArr: [
+            {
+              required: true,
+              validator: validatorBuCangShuLieArr,
+              trigger: 'blur'
+            }
+          ],
+          WangGeZhiYingBiLiArr: [
+            {
+              required: true,
+              validator: validatorWangGeZhiYingBiLiArr,
+              trigger: 'blur'
+            }
+          ],
+          AllowTheCallback: [
+            {
+              required: true,
+              validator: this.$verifys.nullStr({item: '允许回调'}),
+              trigger: 'blur'
+            },
+            {
+              required: true,
+              validator: validatorAllowTheCallback,
+              trigger: 'blur'
+            }
+          ],
         },
+        //初始弹框宽度
+        widthVal: 1000
       }
     },
     computed: {},
@@ -287,7 +425,40 @@
 
       //})
     },
-    methods: {},
+    methods: {
+      submitAdd(){
+        this.widthVal = this.widthVal + 200
+      },
+
+      //添加数组length
+      addItem(){
+        this.ZhiYingBiLiArr.push('');
+        this.BuCangBiLiArr.push('');
+        this.BuCangShuLieArr.push('');
+        this.WangGeZhiYingBiLiArr.push('');
+      },
+
+      //减少数组length
+      removeItem(i){
+        if(i === this.ZhiYingBiLiArr.length){
+          this.ZhiYingBiLiArr.pop();
+          this.BuCangBiLiArr.pop();
+          this.BuCangShuLieArr.pop();
+          this.WangGeZhiYingBiLiArr.pop();
+        }
+        else{
+          this.ZhiYingBiLiArr.splice(i, 1);
+          this.BuCangBiLiArr.splice(i, 1);
+          this.BuCangShuLieArr.splice(i + 1, 1);
+          this.WangGeZhiYingBiLiArr.splice(i, 1);
+        }
+      },
+
+      //限制输入框数字输入
+      limitInputNum(obj, index, val, before, after){
+        this.$set(this[obj], index, this.Mixin_limitInputNum(val, before, after))
+      },
+    },
     props: {},
     watch: {},
     mixins: [],
@@ -296,6 +467,10 @@
   }
 </script>
 
-<style scoped lang="scss">
-  @import "TacticsManage";
+<style lang="scss">
+  .tactics-dialog-wrap{
+    .el-input__inner{
+      padding: 0 4px !important;
+    }
+  }
 </style>

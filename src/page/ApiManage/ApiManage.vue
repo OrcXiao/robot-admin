@@ -66,9 +66,9 @@
         :rules="apiObjRules"
         ref="apiObj"
         label-position="right"
-        label-width="100px">
+        label-width="80px">
         <el-form-item label="平台" prop="platform">
-          <el-select v-model="apiObj.platform" placeholder="请选择平台">
+          <el-select style="width: 100%" v-model="apiObj.platform" placeholder="请选择平台">
             <el-option
               v-for="item in platformOptions"
               :key="item.id"

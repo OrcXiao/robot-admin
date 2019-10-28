@@ -19,7 +19,5 @@ common.errorHint = (text) => {
   })
 };
 
-
-
 export default common;
 
