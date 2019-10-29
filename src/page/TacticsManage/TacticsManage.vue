@@ -1,10 +1,18 @@
 <template>
   <div class="TacticsManage-wrap">
-    <div class="mb30 pb30 bkFFFFFF">
-      <div class="p20 borb">系统策略</div>
+    <div class="mb30 p20 bkFFFFFF">
+      <div class="ptb20">系统策略</div>
       <el-table
+        border
         :data="tableData"
         style="width: 100%">
+        <el-table-column
+          label="序号"
+          type="index"
+          width="50"
+          align="center">
+        </el-table-column>
+
         <el-table-column
           prop="date"
           label="名称"
@@ -14,14 +22,23 @@
           prop="name"
           label="追踪止盈"
           width="180">
+          <template slot-scope="scope">
+            <el-switch v-model="systemStopProfit"></el-switch>
+          </template>
         </el-table-column>
         <el-table-column
           prop="address"
           label="防瀑布">
+          <template slot-scope="scope">
+            <el-switch v-model="systemWaterfall"></el-switch>
+          </template>
         </el-table-column>
         <el-table-column
           prop="address"
           label="网格">
+          <template slot-scope="scope">
+            <el-switch v-model="systemGrid"></el-switch>
+          </template>
         </el-table-column>
         <el-table-column
           prop="address"
@@ -35,8 +52,8 @@
         </el-table-column>
       </el-table>
     </div>
-    <div class="pb30 bkFFFFFF">
-      <div class="dis-fl ju-sb p20 borb">
+    <div class="p20 bkFFFFFF">
+      <div class="dis-fl ju-sb ptb20">
         <div>自定义策略</div>
         <div>
           <el-button
@@ -47,8 +64,16 @@
         </div>
       </div>
       <el-table
+        border
         :data="tableData"
         style="width: 100%">
+        <el-table-column
+          label="序号"
+          type="index"
+          width="50"
+          align="center">
+        </el-table-column>
+
         <el-table-column
           prop="date"
           label="名称"
@@ -58,14 +83,23 @@
           prop="name"
           label="追踪止盈"
           width="180">
+          <template slot-scope="scope">
+            <el-switch v-model="customStopProfit"></el-switch>
+          </template>
         </el-table-column>
         <el-table-column
           prop="address"
           label="防瀑布">
+          <template slot-scope="scope">
+            <el-switch v-model="customWaterfall"></el-switch>
+          </template>
         </el-table-column>
         <el-table-column
           prop="address"
           label="网格">
+          <template slot-scope="scope">
+            <el-switch v-model="customGrid"></el-switch>
+          </template>
         </el-table-column>
         <el-table-column
           prop="address"
@@ -77,6 +111,7 @@
               type="success">修改
             </el-button>
             <el-button
+              @click="clickRemoveBtn(scope.row)"
               icon="el-icon-circle-close"
               type="danger">删除
             </el-button>
@@ -324,7 +359,7 @@
           callback();
         }
       };
-      let validatorAllowTheCallback = (rule, value, callback, str) => {
+      let validatorAllowTheCallback = (rule, value, callback) => {
         if(parseFloat(value) > 99.99){
           callback(new Error('允许回调的最大值不能超过99.99'));
         }
@@ -349,6 +384,19 @@
             address: '上海市'
           }
         ],
+        //系统追踪止盈
+        systemStopProfit: false,
+        //系统防瀑布
+        systemWaterfall: false,
+        //系统防网格
+        systemGrid: false,
+        //自定义追踪止盈
+        customStopProfit: false,
+        //自定义防瀑布
+        customWaterfall: false,
+        //自定义防网格
+        customGrid: false,
+
         //显示自定义弹框
         isShowAddTacticsDialog: false,
         //网格开启或关闭条件候选项
@@ -464,7 +512,9 @@
           ],
         },
         //初始弹框宽度
-        widthVal: 1000
+        widthVal: 1000,
+
+
       }
     },
     computed: {},
@@ -476,6 +526,7 @@
       //})
     },
     methods: {
+      //提交新增
       submitAdd(formName){
         this.$refs[formName].validate((valid) => {
           if(!valid){
@@ -485,7 +536,18 @@
 
           }
         })
+      },
 
+      //点击'删除'按钮
+      clickRemoveBtn(row){
+        this.$confirm(`确定删除自定义策略 ?`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'error'
+        }).then(() => {
+
+        }).catch(() => {
+        })
       },
 
       //添加数组length

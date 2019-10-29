@@ -214,7 +214,7 @@
         this.$confirm(`确定删除API ?`, '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
-          type: 'warning'
+          type: 'error'
         }).then(() => {
 
         }).catch(() => {

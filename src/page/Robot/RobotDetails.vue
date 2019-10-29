@@ -80,17 +80,17 @@
             type="success">修改
           </el-button>
           <el-button
-            @click="clickEditBtn(scope.row)"
+            @click="clickPositionBtn(scope.row)"
             icon="el-icon-shopping-cart-2"
             type="info">持仓
           </el-button>
           <el-button
-            @click="clickRemoveBtn(scope.row)"
+            @click="clickEarningsBtn(scope.row)"
             icon="el-icon-s-goods"
             type="warning">收益
           </el-button>
           <el-button
-            @click="clickRemoveBtn(scope.row)"
+            @click="clickCloseAPositionBtn(scope.row)"
             icon="el-icon-data-line">闪电平仓
           </el-button>
         </template>
@@ -155,7 +155,7 @@
           label="操作">
           <template slot-scope="scope">
             <el-button
-              @click="clickEditBtn(scope.row)"
+              @click="clickDetailsBtn(scope.row)"
               icon="el-icon-tickets"
               type="warning">详情
             </el-button>
@@ -189,10 +189,6 @@
           type="index"
           width="50"
           align="center">
-        </el-table-column>
-        <el-table-column
-          prop="name"
-          label="交易对">
         </el-table-column>
         <el-table-column
           prop="name"
@@ -247,15 +243,15 @@
       @close="Mixin_closeDialog('robotObj', 'isShowEditRobotDialog')"
       :visible.sync="isShowEditRobotDialog"
       :append-to-body=true
-      width="500px">
+      width="400px">
       <el-form
         :model="robotObj"
         :rules="robotObjRules"
         ref="robotObj"
         label-position="right"
-        label-width="140px">
+        label-width="100px">
         <el-form-item label="策略" prop="tactics">
-          <el-select style="width: 320px" v-model="robotObj.tactics" placeholder="请选择策略">
+          <el-select class="wd100" v-model="robotObj.tactics" placeholder="请选择策略">
             <el-option
               v-for="item in tacticsOptions"
               :key="item.id"
@@ -276,12 +272,34 @@
       </el-form>
       <span slot="footer" class="dialog-footer">
 		    <el-button @click="isShowEditRobotDialog = false">取 消</el-button>
-		    <el-button type="primary" @click="submitAdd('robotObj')" v-if="currentHandleType==='add'">确 定</el-button>
-		    <el-button type="primary" @click="submitEdit('robotObj')" v-if="currentHandleType==='edit'">保 存</el-button>
+		    <el-button type="primary" @click="submitEdit('robotObj')">保 存</el-button>
+		  </span>
+    </el-dialog>
+
+    <!--闪电平仓-->
+    <el-dialog
+      @close="Mixin_closeDialog('robotObj', 'isShowCloseAPositionDialog')"
+      :visible.sync="isShowCloseAPositionDialog"
+      :append-to-body=true
+      width="400px">
+      <el-form
+        label-position="right"
+        label-width="120px">
+        <el-form-item label="当前持有仓位 :">
+          <div>10BTC</div>
+        </el-form-item>
+        <el-form-item label="当前盈利率 :">
+          <el-tag type="success" effect="dark">+3%</el-tag>
+          <el-tag type="danger" effect="dark">-2%</el-tag>
+        </el-form-item>
+        <div class="tc">请你确认是否全部平仓 ?</div>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+		    <el-button @click="isShowCloseAPositionDialog = false">取 消</el-button>
+		    <el-button type="primary" @click="submitCloseAPosit">保 存</el-button>
 		  </span>
 
     </el-dialog>
-
   </div>
 </template>
 
@@ -351,14 +369,25 @@
           StopCover: false,
           RunningStatus: false,
         },
-        robotObjRules:{
-          tactics:[
+        robotObjRules: {
+          tactics: [
             {
-
-            }
+              required: true,
+              validator: this.$verifys.nullStr({item: '策略'}),
+              trigger: 'blur'
+            },
           ]
+        },
+        //显示闪电平仓弹框
+        isShowCloseAPositionDialog: false,
+        //闪电平仓
+        CloseAPositObj:{
+          id: '',
+          //仓位
+          shipping: '',
+          //盈利率
+          earningsRate: '',
         }
-
 
       }
     },
@@ -366,11 +395,60 @@
     created(){
     },
     mounted(){
-      //this.$ nextTick(() => {
-
-      //})
+      this.$nextTick(() => {
+        this.initData();
+      })
     },
-    methods: {},
+    methods: {
+      //获取初始表格数据
+      initData(){
+
+      },
+
+      //点击'编辑'按钮
+      clickEditBtn(){
+        this.isShowEditRobotDialog = true;
+      },
+
+      //点击'持仓'按钮
+      clickPositionBtn(){
+        this.isShowEarningsDetailsDialog = true;
+      },
+
+      //点击'收益'按钮
+      clickEarningsBtn(){
+        this.isShowEarningsDialog = true;
+      },
+
+      //点击'闪电平仓'按钮
+      clickCloseAPositionBtn(){
+        this.isShowCloseAPositionDialog = true;
+      },
+
+      //点击'收益表格里的详情'按钮
+      clickDetailsBtn(){
+        this.isShowEarningsDetailsDialog = true;
+      },
+
+      //提交修改
+      submitEdit(formName){
+        this.$refs[formName].validate((valid) => {
+          if(!valid){
+            return false;
+          }
+          else{
+
+          }
+        })
+      },
+
+      //提交闪电平仓
+      submitCloseAPosit(){
+
+      },
+
+
+    },
     props: {},
     watch: {},
     mixins: [],

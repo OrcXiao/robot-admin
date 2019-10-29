@@ -71,7 +71,7 @@
   }
 
   .el-menu-item{
-    padding-left: 35px !important;
+    padding-left: 33px !important;
     background: transparent !important;
   }
 
@@ -81,11 +81,13 @@
 
   .nav-wrap{
     .logo-wrap{
-      padding: 20px 0 20px 35px;
+      text-align: center;
+      padding: 20px 0;
 
       img{
         position: relative;
         top: 6px;
+        margin-right: 4px;
       }
 
       span{

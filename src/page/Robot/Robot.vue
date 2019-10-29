@@ -58,10 +58,17 @@
             type="success">修改
           </el-button>
           <el-button
-            @click="clickEditBtn(scope.row)"
+            @click="clickPauseBtn(scope.row)"
             icon="el-icon-video-pause"
             type="info">暂停
           </el-button>
+<!--
+          <el-button
+            @click="clickStartBtn(scope.row)"
+            icon="el-icon-video-play"
+            type="info">启动
+          </el-button>
+-->
           <el-button
             @click="clickRemoveBtn(scope.row)"
             icon="el-icon-circle-close"
@@ -98,81 +105,77 @@
         ref="robotObj"
         label-position="right"
         label-width="140px">
-        <el-form-item label="机器人名称" prop="name">
+        <el-form-item label="机器人名称 :" prop="name">
           <el-input v-model="robotObj.name" placeholder="请输入机器人名称"></el-input>
         </el-form-item>
-        <el-form-item label="交易所" prop="bourse">
+        <el-form-item label="交易所 :" prop="bourse">
           <el-select style="width: 320px" v-model="robotObj.bourse" placeholder="请选择交易所">
             <el-option
-              v-for="item in bourseOptions"
-              :key="item.id"
+              v-for="(item, index) in bourseOptions"
+              :key="index"
               :label="item.name"
               :value="item.id">
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="交易区" prop="tradingRange">
+        <el-form-item label="交易区 :" prop="tradingRange">
           <el-select style="width: 320px" v-model="robotObj.tradingRange" placeholder="请选择交易区">
             <el-option
-              v-for="item in tradingRangeOptions"
-              :key="item.id"
+              v-for="(item, index) in tradingRangeOptions"
+              :key="index"
               :label="item.name"
               :value="item.id">
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="你所持有的币种" prop="coin">
+        <el-form-item label="持有的币种 :" prop="coin">
           <el-checkbox-group v-model="robotObj.coin">
             <el-checkbox
-              v-for="item in coinOptions"
-              :key="item.id"
+              v-for="(item, index) in coinOptions"
+              :key="index"
               label="餐厅线上活动"
               name="type">
             </el-checkbox>
           </el-checkbox-group>
         </el-form-item>
-        <el-form-item label="交易币对" prop="MoneyFor">
+        <el-form-item label="交易币对 :" prop="MoneyFor">
           <el-checkbox-group v-model="robotObj.MoneyFor">
             <el-checkbox
-              v-for="item in MoneyForOptions"
-              :key="item.id"
+              v-for="(item, index) in MoneyForOptions"
+              :key="index"
               label="餐厅线上活动"
               name="type">
             </el-checkbox>
           </el-checkbox-group>
         </el-form-item>
-        <el-form-item label="USDT本金" prop="USDT">
+        <el-form-item label="USDT本金 :" prop="USDT">
           <el-input v-model="robotObj.USDT" placeholder="请输入USDT本金"></el-input>
           <div class="text-right">
             <div class="cuso">USDT余额:</div>
           </div>
         </el-form-item>
-        <el-form-item label="BTC本金" prop="BTC">
+        <el-form-item label="BTC本金 :" prop="BTC">
           <el-input v-model="robotObj.BTC" placeholder="请输入BTC本金"></el-input>
           <div class="text-right">
             <div class="cuso">BTC余额:</div>
           </div>
         </el-form-item>
-        <el-form-item label="ETH本金" prop="ETH">
+        <el-form-item label="ETH本金 :" prop="ETH">
           <el-input v-model="robotObj.ETH" placeholder="请输入ETH本金"></el-input>
           <div class="text-right">
             <div class="cuso">ETH余额:</div>
           </div>
         </el-form-item>
-        <el-form-item label="策略" prop="tactics">
+        <el-form-item label="策略 :" prop="tactics">
           <el-select style="width: 320px" v-model="robotObj.tactics" placeholder="请选择策略">
             <el-option
-              v-for="item in tacticsOptions"
-              :key="item.id"
+              v-for="(item, index) in tacticsOptions"
+              :key="index"
               :label="item.name"
               :value="item.id">
             </el-option>
           </el-select>
-          <div class="text-right">
-            <div class="cuso"><i class="el-icon-question"></i>自定义策略</div>
-          </div>
         </el-form-item>
-
       </el-form>
       <span slot="footer" class="dialog-footer">
 		    <el-button @click="isShowAddOrEditDialog = false">取 消</el-button>
@@ -243,7 +246,71 @@
           tactics: '',
         },
         //机器人属性的校验
-        robotObjRules: {}
+        robotObjRules: {
+          name:[
+            {
+              required: true,
+              validator: this.$verifys.nullStr({item: '机器人名称'}),
+              trigger: 'blur'
+            },
+          ],
+          bourse:[
+            {
+              required: true,
+              validator: this.$verifys.nullStr({item: '交易所'}),
+              trigger: 'blur'
+            },
+          ],
+          tradingRange:[
+            {
+              required: true,
+              validator: this.$verifys.nullStr({item: '交易区'}),
+              trigger: 'blur'
+            },
+          ],
+          coin:[
+            {
+              required: true,
+              validator: this.$verifys.nullStr({item: '持有的币种'}),
+              trigger: 'blur'
+            },
+          ],
+          MoneyFor:[
+            {
+              required: true,
+              validator: this.$verifys.nullStr({item: '交易币对'}),
+              trigger: 'blur'
+            },
+          ],
+          USDT:[
+            {
+              required: true,
+              validator: this.$verifys.nullStr({item: 'USDT本金'}),
+              trigger: 'blur'
+            },
+          ],
+          BTC:[
+            {
+              required: true,
+              validator: this.$verifys.nullStr({item: 'BTC本金'}),
+              trigger: 'blur'
+            },
+          ],
+          ETH:[
+            {
+              required: true,
+              validator: this.$verifys.nullStr({item: 'ETH本金'}),
+              trigger: 'blur'
+            },
+          ],
+          tactics:[
+            {
+              required: true,
+              validator: this.$verifys.nullStr({item: '策略'}),
+              trigger: 'blur'
+            },
+          ],
+        }
 
       }
     },
@@ -257,10 +324,52 @@
     },
     methods: {
 
-      //点击'添加'
+      //点击'添加'按钮
       clickAddBtn(){
         this.currentHandleType = 'add';
         this.isShowAddOrEditDialog = true;
+      },
+
+      //点击'编辑'按钮
+      clickEditBtn(){
+        this.currentHandleType = 'edit';
+        this.isShowAddOrEditDialog = true;
+      },
+
+      //点击'暂停'按钮
+      clickPauseBtn(row){
+        this.$confirm(`确定暂停机器人 ?`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+
+        }).catch(() => {
+        })
+      },
+
+      //点击'启动'按钮
+      clickStartBtn(row){
+        this.$confirm(`确定启动机器人 ?`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+
+        }).catch(() => {
+        })
+      },
+
+      //点击'暂停'按钮
+      clickRemoveBtn(row){
+        this.$confirm(`确定删除机器人 ?`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'error'
+        }).then(() => {
+
+        }).catch(() => {
+        })
       },
 
       //提交新增

@@ -267,6 +267,11 @@
         border-radius: 4px;
         padding: 30px;
 
+        img{
+          margin-top: 5px;
+          height: 50px;
+        }
+
         .time-ip-wrap{
           padding-left: 24px;
 
@@ -323,7 +328,7 @@
         }
 
         .el-table__body tr:hover > td > div{
-          background-color: #365CD9 !important;
+          background-color: #4B81E2 !important;
           color: #ffffff;
         }
 

@@ -2,7 +2,7 @@
   <div class="hg100 dis-fl ju-sb header-wrap">
     <div class="project-name"></div>
     <div class="info-wrap">
-      <i class="el-icon-bell cl4B81E2 fs20 info-icon"></i>
+      <i class="el-icon-bell cl4B81E2 fs20 info-icon cuso"></i>
       <el-dropdown @command="handleCommand" trigger="click">
         <span class="el-dropdown-link">
           <el-button icon="el-icon-user" circle></el-button>
