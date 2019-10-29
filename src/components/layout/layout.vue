@@ -44,6 +44,13 @@
 <style scoped lang="scss">
   .el-header{
     padding: 0;
+    /*box-shadow: 5px 0 2px 2px #edeef3;*/
+    box-shadow: 4px 0 10px #e1e2e7;
+
+  }
+
+  .el-main{
+    margin-top: 2px;
   }
 
   .container{

@@ -3,7 +3,7 @@
     <!--start 头部四个信息-->
     <div class="dis-fl ju-sb pb30 info-wrap">
       <div class="dis-fl bs bkFFFFFF info-area">
-        <img src="../../assets/img/home/shijian.png" height="56" width="43"/>
+        <img class="first-img" src="../../assets/img/home/shijian.png"/>
         <div class="time-ip-wrap">
           <div class="fs14 time">上次登录时间：2019-10-22 15:41</div>
           <div class="fs14">上次登录IP：172.10.20.39</div>
@@ -188,8 +188,13 @@
             x: 'center',
             y: '10',
             icon: 'circle',
-            itemGap: 30,
-            data: ['BTC', 'USDT']
+            itemGap: 40,
+            itemWidth: 8,
+            data: ['BTC', 'USDT'],
+            textStyle: {
+              color: '#B2B2B2',
+              padding: [3,1,1,1]
+            }
           },
           grid: {
             left: '3%',
@@ -202,9 +207,10 @@
             boundaryGap: false,
             axisLine: {
               lineStyle: {
-                color: '#959595'
+                color: '#bababa'
               }
             },
+
             data: ['0101', '0201', '0301', '0401', '0501', '0601', '0701']
           },
           yAxis: {
@@ -270,6 +276,10 @@
         img{
           margin-top: 5px;
           height: 50px;
+        }
+
+        .first-img{
+          height: 56px !important;
         }
 
         .time-ip-wrap{

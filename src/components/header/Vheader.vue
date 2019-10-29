@@ -45,8 +45,6 @@
 <style scoped lang="scss">
   .header-wrap{
     height: 60px;
-    box-shadow: 0 0 10px gray;
-
 
     & > .project-name{
       padding-left: 20px;

@@ -149,6 +149,7 @@
           .login-btn{
             margin-top: 40px;
             height: 56px;
+            letter-spacing: 4px;
           }
         }
       }
