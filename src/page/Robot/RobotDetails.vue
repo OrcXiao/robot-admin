@@ -91,7 +91,7 @@
           </el-button>
           <el-button
             @click="clickRemoveBtn(scope.row)"
-            icon="el-icon-folder-remove">闪电平仓
+            icon="el-icon-data-line">闪电平仓
           </el-button>
         </template>
       </el-table-column>

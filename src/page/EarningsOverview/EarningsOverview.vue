@@ -89,6 +89,8 @@
     name: "EarningsOverview",
     data(){
       return {
+        //表格数据
+        tableData:[],
         //机器人候选项
         robotOptions: [],
         //机器人

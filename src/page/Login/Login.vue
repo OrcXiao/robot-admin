@@ -10,7 +10,7 @@
           <el-form class="login-form" :model="login" :rules="loginRules" ref="login">
             <el-form-item prop="user" class="item-input">
               <el-input
-                placeholder="请输入用户名"
+                placeholder="请输入账号"
                 v-model="login.user">
               </el-input>
               <img src="../../assets/img/login/yonghuming.png"/>
@@ -51,7 +51,7 @@
           user: [
             {
               required: true,
-              validator: this.$verifys.nullStr({item: '用户名'}),
+              validator: this.$verifys.nullStr({item: '账号'}),
               trigger: 'blur'
             },
           ],

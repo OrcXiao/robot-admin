@@ -25,11 +25,11 @@
         </el-table-column>
         <el-table-column
           prop="address"
-          label="详情">
+          label="操作">
           <template slot-scope="scope">
             <el-button
               icon="el-icon-tickets"
-              type="warning">查看
+              type="warning">详情
             </el-button>
           </template>
         </el-table-column>
@@ -69,11 +69,12 @@
         </el-table-column>
         <el-table-column
           prop="address"
-          label="详情">
+          label="操作">
           <template slot-scope="scope">
             <el-button
-              icon="el-icon-tickets"
-              type="warning">查看
+              @click="clickEditBtn(scope.row)"
+              icon="el-icon-edit"
+              type="success">修改
             </el-button>
             <el-button
               icon="el-icon-circle-close"
@@ -97,7 +98,7 @@
         :rules="tacticsObjRules"
         ref="tacticsObj"
         label-position="right"
-        label-width="140px">
+        label-width="150px">
         <el-form-item label="止盈比例 ( % ) :" prop="ZhiYingBiLiArr">
           <div class="dis-fl">
             <el-input
@@ -113,15 +114,17 @@
                 style="padding: 12px"
                 slot="append"
                 v-if="index > 0"
-                icon="el-icon-remove"></el-button>
+                icon="el-icon-remove">
+              </el-button>
             </el-input>
             <el-button
               @click="addItem"
               style="padding: 12px"
-              icon="el-icon-circle-plus"></el-button>
+              icon="el-icon-circle-plus">
+            </el-button>
           </div>
         </el-form-item>
-        <el-form-item label="补仓比例 ( % ) :" prop="MarginPercentage">
+        <el-form-item label="补仓比例 ( % ) :" prop="BuCangBiLiArr">
           <div class="dis-fl">
             <el-input
               v-for="(item, index) in BuCangBiLiArr"
@@ -143,7 +146,7 @@
               icon="el-icon-circle-plus"></el-button>
           </div>
         </el-form-item>
-        <el-form-item label="补仓数列 ( 倍 ) :" prop="CoverSeries">
+        <el-form-item label="补仓数列 ( 倍 ) :" prop="BuCangShuLieArr">
           <div class="dis-fl">
             <el-input
               v-for="(item, index) in BuCangShuLieArr"
@@ -193,7 +196,7 @@
         <el-form-item label="防瀑布 :">
           <el-switch v-model="tacticsObj.ToPreventFalls"></el-switch>
         </el-form-item>
-        <el-form-item v-if="tacticsObj.ToPreventFalls" label="允许回调 :" prop="AllowTheCallback2">
+        <el-form-item v-if="tacticsObj.ToPreventFalls" label="允许回调 :" prop="AllowTheCallback">
           <div class="dis-fl">
             <el-input
               @keyup.native="Mixin_limitInputNum('tacticsObj.AllowTheCallback2', 3, 2)"
@@ -204,10 +207,10 @@
             <span class="pl10">%</span>
           </div>
         </el-form-item>
-        <el-form-item v-if="tacticsObj.ToPreventFalls" label="横盘时间 :" prop="SidewaysTime2">
+        <el-form-item v-if="tacticsObj.ToPreventFalls" label="横盘时间 :" prop="SidewaysTime">
           <div class="dis-fl">
             <el-input
-              @keyup.native="Mixin_commonLimitInput('tacticsObj.SidewaysTime', 4, 0, false)"
+              @keyup.native="Mixin_commonLimitInput('tacticsObj.SidewaysTime2', 4, 0, false)"
               style="width: 250px;"
               v-model="tacticsObj.SidewaysTime2"
               placeholder="请输入横盘时间">
@@ -244,7 +247,7 @@
             <span class="pl10">手</span>
           </div>
         </el-form-item>
-        <el-form-item v-if="tacticsObj.Grid" label="网格止盈比例 ( % ) :" prop="CheckSurplusProportion">
+        <el-form-item v-if="tacticsObj.Grid" label="网格止盈比例 ( % ) :" prop="WangGeZhiYingBiLiArr">
           <div class="dis-fl">
             <el-input
               v-for="(item, index) in WangGeZhiYingBiLiArr"
@@ -277,6 +280,9 @@
         if(val){
           callback(new Error('输入的最大数不能超过999.99'));
         }
+        else if(this.ZhiYingBiLiArr.includes('')){
+          callback(new Error('请输入所有的之盈比例'));
+        }
         else{
           callback();
         }
@@ -286,6 +292,10 @@
         if(val){
           callback(new Error('输入的最大数不能超过999.99'));
         }
+        else if(this.ZhiYingBiLiArr.includes('')){
+          callback(new Error('请输入所有的补仓比例'));
+        }
+
         else{
           callback();
         }
@@ -294,6 +304,9 @@
         let val = this.BuCangShuLieArr.find(item => parseFloat(item) > 999.99);
         if(val){
           callback(new Error('输入的最大数不能超过999.99'));
+        }
+        else if(this.ZhiYingBiLiArr.includes('')){
+          callback(new Error('请输入所有的补仓数列'));
         }
         else{
           callback();
@@ -304,13 +317,24 @@
         if(val){
           callback(new Error('输入的最大数不能超过999.99'));
         }
+        else if(this.ZhiYingBiLiArr.includes('')){
+          callback(new Error('请输入所有的网格止盈比例'));
+        }
         else{
           callback();
         }
       };
       let validatorAllowTheCallback = (rule, value, callback, str) => {
-        if(!value){
-          callback(new Error('输入的最大数不能超过999.99'));
+        if(parseFloat(value) > 99.99){
+          callback(new Error('允许回调的最大值不能超过99.99'));
+        }
+        else{
+          callback();
+        }
+      };
+      let validatorSidewaysTime = (rule, value, callback, str) => {
+        if(parseFloat(value) > 1800){
+          callback(new Error('横盘时间最大值不能超过1800'));
         }
         else{
           callback();
@@ -326,7 +350,7 @@
           }
         ],
         //显示自定义弹框
-        isShowAddTacticsDialog: true,
+        isShowAddTacticsDialog: false,
         //网格开启或关闭条件候选项
         conditionOptions: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         //止盈比例数组
@@ -412,6 +436,32 @@
               trigger: 'blur'
             }
           ],
+          SidewaysTime: [
+            {
+              required: true,
+              validator: this.$verifys.nullStr({item: '横盘时间'}),
+              trigger: 'blur'
+            },
+            {
+              required: true,
+              validator: validatorSidewaysTime,
+              trigger: 'blur'
+            }
+          ],
+          OpenCondition: [
+            {
+              required: true,
+              validator: this.$verifys.nullStr({item: '网格开启条件'}),
+              trigger: 'blur'
+            },
+          ],
+          CloseCondition: [
+            {
+              required: true,
+              validator: this.$verifys.nullStr({item: '网格关闭条件'}),
+              trigger: 'blur'
+            },
+          ],
         },
         //初始弹框宽度
         widthVal: 1000
@@ -426,8 +476,16 @@
       //})
     },
     methods: {
-      submitAdd(){
-        this.widthVal = this.widthVal + 200
+      submitAdd(formName){
+        this.$refs[formName].validate((valid) => {
+          if(!valid){
+            return false;
+          }
+          else{
+
+          }
+        })
+
       },
 
       //添加数组length
@@ -436,6 +494,10 @@
         this.BuCangBiLiArr.push('');
         this.BuCangShuLieArr.push('');
         this.WangGeZhiYingBiLiArr.push('');
+        if(this.BuCangShuLieArr.length > 6){
+          let width = this.WangGeZhiYingBiLiArr.length * 120 + 200;
+          this.widthVal = width > 1200 ? width : 1200;
+        }
       },
 
       //减少数组length
