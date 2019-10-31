@@ -249,7 +249,7 @@
         :rules="robotObjRules"
         ref="robotObj"
         label-position="right"
-        label-width="100px">
+        label-width="140px">
         <el-form-item label="策略" prop="tactics">
           <el-select class="wd100" v-model="robotObj.tactics" placeholder="请选择策略">
             <el-option
@@ -262,6 +262,15 @@
         </el-form-item>
         <el-form-item label="网格清仓">
           <el-switch v-model="robotObj.GridClearance"></el-switch>
+        </el-form-item>
+        <el-form-item v-if="robotObj.GridClearance" label="网格清仓百分比" prop="percentage">
+          <div class="dis-fl">
+            <el-input
+              @input.native="Mixin_commonLimitInput('robotObj.percentage', 2, 0, false)"
+              v-model="robotObj.percentage"
+              placeholder="请输入网格清仓百分比"></el-input>
+            <div class="ml20">%</div>
+          </div>
         </el-form-item>
         <el-form-item label="停止补仓">
           <el-switch v-model="robotObj.StopCover"></el-switch>
@@ -278,6 +287,7 @@
 
     <!--闪电平仓-->
     <el-dialog
+      title="闪电平仓"
       @close="Mixin_closeDialog('robotObj', 'isShowCloseAPositionDialog')"
       :visible.sync="isShowCloseAPositionDialog"
       :append-to-body=true
@@ -366,6 +376,7 @@
         robotObj: {
           tactics: '',
           GridClearance: false,
+          percentage: '',
           StopCover: false,
           RunningStatus: false,
         },
@@ -376,6 +387,14 @@
               validator: this.$verifys.nullStr({item: '策略'}),
               trigger: 'blur'
             },
+          ],
+          percentage:[
+            {
+              required: true,
+              validator: this.$verifys.nullStr({item: '网格清仓百分比'}),
+              trigger: 'blur'
+
+            }
           ]
         },
         //显示闪电平仓弹框

@@ -1,6 +1,6 @@
 <template>
   <div class="nav-wrap">
-    <div class="logo-wrap">
+    <div @click="$router.push('/home')" class="logo-wrap cuso">
       <img src="../../assets/img/nav/sign_in_logo.png"/>
       <span class="fs18 clFFFFFF">后台管理系统</span>
     </div>
@@ -72,7 +72,11 @@
 
   .el-menu-item{
     padding-left: 33px !important;
-    background: transparent !important;
+    background: #4b81e2 !important;
+  }
+
+  .el-menu-item:hover{
+    background: #4873d1 !important;
   }
 
   .el-menu-item i{

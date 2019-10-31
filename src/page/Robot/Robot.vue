@@ -62,13 +62,13 @@
             icon="el-icon-video-pause"
             type="info">暂停
           </el-button>
-<!--
-          <el-button
-            @click="clickStartBtn(scope.row)"
-            icon="el-icon-video-play"
-            type="info">启动
-          </el-button>
--->
+          <!--
+                    <el-button
+                      @click="clickStartBtn(scope.row)"
+                      icon="el-icon-video-play"
+                      type="info">启动
+                    </el-button>
+          -->
           <el-button
             @click="clickRemoveBtn(scope.row)"
             icon="el-icon-circle-close"
@@ -133,8 +133,9 @@
             <el-checkbox
               v-for="(item, index) in coinOptions"
               :key="index"
-              label="餐厅线上活动"
-              name="type">
+              name="type"
+              :label="item.id">
+              {{item.name}}
             </el-checkbox>
           </el-checkbox-group>
         </el-form-item>
@@ -143,27 +144,37 @@
             <el-checkbox
               v-for="(item, index) in MoneyForOptions"
               :key="index"
-              label="餐厅线上活动"
+              :label="item.id"
               name="type">
+              {{item.name}}
             </el-checkbox>
           </el-checkbox-group>
         </el-form-item>
         <el-form-item label="USDT本金 :" prop="USDT">
-          <el-input v-model="robotObj.USDT" placeholder="请输入USDT本金"></el-input>
+          <el-input
+            @input.native="Mixin_commonLimitInput('robotObj.USDT', 9, 6)"
+            v-model="robotObj.USDT"
+            placeholder="请输入USDT本金"></el-input>
           <div class="text-right">
-            <div class="cuso">USDT余额:</div>
+            <div class="cuso">USDT余额:{{USDTBalance}}</div>
           </div>
         </el-form-item>
         <el-form-item label="BTC本金 :" prop="BTC">
-          <el-input v-model="robotObj.BTC" placeholder="请输入BTC本金"></el-input>
+          <el-input
+            @input.native="Mixin_commonLimitInput('robotObj.BTC', 9, 6)"
+            v-model="robotObj.BTC"
+            placeholder="请输入BTC本金"></el-input>
           <div class="text-right">
-            <div class="cuso">BTC余额:</div>
+            <div class="cuso">BTC余额:{{BTCBalance}}</div>
           </div>
         </el-form-item>
         <el-form-item label="ETH本金 :" prop="ETH">
-          <el-input v-model="robotObj.ETH" placeholder="请输入ETH本金"></el-input>
+          <el-input
+            @input.native="Mixin_commonLimitInput('robotObj.ETH', 9, 6)"
+            v-model="robotObj.ETH"
+            placeholder="请输入ETH本金"></el-input>
           <div class="text-right">
-            <div class="cuso">ETH余额:</div>
+            <div class="cuso">ETH余额:{{ETHBalance}}</div>
           </div>
         </el-form-item>
         <el-form-item label="策略 :" prop="tactics">
@@ -219,9 +230,39 @@
         //交易区候选项数组
         tradingRangeOptions: [],
         //币种候选项数组
-        coinOptions: [],
+        coinOptions: [
+          {
+            name: 'BTC',
+            id: 1
+          },
+          {
+            name: 'ETH',
+            id: 2
+          },
+          {
+            name: 'USDT',
+            id: 3
+          },
+        ],
         //交易币对候选项数组
-        MoneyForOptions: [],
+        MoneyForOptions: [{
+          name: 'BTC',
+          id: 1
+        },
+          {
+            name: 'ETH',
+            id: 2
+          },
+          {
+            name: 'USDT',
+            id: 3
+          },],
+        //USDT余额
+        USDTBalance: '',
+        //BTC余额
+        BTCBalance: '',
+        //ETH余额
+        ETHBalance: '',
         //策略候选项数组
         tacticsOptions: [],
         //机器人obj
@@ -233,9 +274,9 @@
           //交易区
           tradingRange: '',
           //所持有的币种
-          coin: '',
+          coin: [],
           //交易币对
-          MoneyFor: '',
+          MoneyFor: [],
           //USDT
           USDT: '',
           //BTC
@@ -247,63 +288,63 @@
         },
         //机器人属性的校验
         robotObjRules: {
-          name:[
+          name: [
             {
               required: true,
               validator: this.$verifys.nullStr({item: '机器人名称'}),
               trigger: 'blur'
             },
           ],
-          bourse:[
+          bourse: [
             {
               required: true,
               validator: this.$verifys.nullStr({item: '交易所'}),
               trigger: 'blur'
             },
           ],
-          tradingRange:[
+          tradingRange: [
             {
               required: true,
               validator: this.$verifys.nullStr({item: '交易区'}),
               trigger: 'blur'
             },
           ],
-          coin:[
+          coin: [
             {
               required: true,
               validator: this.$verifys.nullStr({item: '持有的币种'}),
               trigger: 'blur'
             },
           ],
-          MoneyFor:[
+          MoneyFor: [
             {
               required: true,
               validator: this.$verifys.nullStr({item: '交易币对'}),
               trigger: 'blur'
             },
           ],
-          USDT:[
+          USDT: [
             {
               required: true,
               validator: this.$verifys.nullStr({item: 'USDT本金'}),
               trigger: 'blur'
             },
           ],
-          BTC:[
+          BTC: [
             {
               required: true,
               validator: this.$verifys.nullStr({item: 'BTC本金'}),
               trigger: 'blur'
             },
           ],
-          ETH:[
+          ETH: [
             {
               required: true,
               validator: this.$verifys.nullStr({item: 'ETH本金'}),
               trigger: 'blur'
             },
           ],
-          tactics:[
+          tactics: [
             {
               required: true,
               validator: this.$verifys.nullStr({item: '策略'}),

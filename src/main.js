@@ -13,9 +13,12 @@ import verify         from './verify/index';
 import {globalMixins} from "./mixin/global_mixin.js"
 //引入公共的方法
 import common         from './common'
+//引入api接口
+import api            from './api/api'
 
 Vue.prototype.$verifys = verify;
 Vue.prototype.$common = common;
+Vue.prototype.$api = api;
 
 Vue.use(ElementUI);
 

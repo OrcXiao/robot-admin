@@ -1,4 +1,3 @@
-import layout from "../components/layout/layout";
 const routerArr = [
   {
     path: "/",
@@ -12,7 +11,7 @@ const routerArr = [
   {
     path: "/home",
     redirect: "/",
-    component: layout,
+    component: () => import("../components/layout/layout.vue"),
     children: [
       {
         path: "/",
@@ -24,7 +23,7 @@ const routerArr = [
   {
     path: "/apiManage",
     redirect: "/",
-    component: layout,
+    component: () => import("../components/layout/layout.vue"),
     children: [
       {
         path: "/",
@@ -37,7 +36,7 @@ const routerArr = [
   {
     path: "/tacticsManage",
     redirect: "/",
-    component: layout,
+    component: () => import("../components/layout/layout.vue"),
     children: [
       {
         path: "/",
@@ -50,7 +49,7 @@ const routerArr = [
   {
     path: "/robot",
     redirect: "/",
-    component: layout,
+    component: () => import("../components/layout/layout.vue"),
     children: [
       {
         path: "/",
@@ -67,7 +66,7 @@ const routerArr = [
   {
     path: "/earningsOverview",
     redirect: "/",
-    component: layout,
+    component: () => import("../components/layout/layout.vue"),
     children: [
       {
         path: "/",
@@ -76,7 +75,6 @@ const routerArr = [
       }
     ]
   },
-  
   
   /*
    *增加404页面

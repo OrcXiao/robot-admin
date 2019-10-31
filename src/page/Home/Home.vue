@@ -5,21 +5,21 @@
       <div class="dis-fl bs bkFFFFFF info-area">
         <img class="first-img" src="../../assets/img/home/shijian.png"/>
         <div class="time-ip-wrap">
-          <div class="fs14 time">上次登录时间：2019-10-22 15:41</div>
-          <div class="fs14">上次登录IP：172.10.20.39</div>
+          <div class="fs14 time">上次登录：{{login_record_created_at}}</div>
+          <div class="fs14">上次登录IP：{{login_record_ip}}</div>
         </div>
       </div>
       <div @click="jumpPath('/robot')" class="dis-fl bs bkFFFFFF cuso info-area">
-        <img src="../../assets/img/home/robotAcon.png"/>
+        <img src="../../assets/img/home/robot.png"/>
         <div class="time-ip-wrap">
-          <div class="fs24">1234</div>
+          <div class="fs24">{{total_robot_amount}}</div>
           <div class="fs14 text cl9696AE">机器人总数</div>
         </div>
       </div>
       <div @click="jumpPath('/earningsOverview')" class="dis-fl bs bkFFFFFF cuso info-area">
-        <img src="../../assets/img/home/shuliang.png"/>
+        <img src="../../assets/img/home/zonghe.png"/>
         <div class="time-ip-wrap">
-          <div class="fs24">1,000USDT</div>
+          <div class="fs24">{{total_profit_amount}} {{total_profit_currency}}</div>
           <div class="fs14 text cl9696AE">价值总和约</div>
         </div>
       </div>
@@ -27,15 +27,15 @@
         <img src="../../assets/img/home/yunxing.png"/>
         <div class="dis-fl ju-sb info-box time-ip-wrap">
           <div>
-            <div class="fs24">11,045</div>
+            <div class="fs24 cl3EC980">{{run_status_running}}</div>
             <div class="fs14 text cl9696AE">运行中</div>
           </div>
           <div>
-            <div class="fs24">1,023</div>
+            <div class="fs24 clFF8400">{{run_status_stop}}</div>
             <div class="fs14 text cl9696AE">暂停中</div>
           </div>
           <div>
-            <div class="fs24">814</div>
+            <div class="fs24 clFF2E2E">{{run_status_warning}}</div>
             <div class="fs14 text cl9696AE">异常</div>
           </div>
         </div>
@@ -52,7 +52,7 @@
       <div class="bkFFFFFF p30 bs br4 table-box">
         <div class="fw pb10 title">预计平仓</div>
         <el-table
-          :data="tableData"
+          :data="CloseOutTableData"
           style="width: 100%">
           <el-table-column
             label="序号"
@@ -90,7 +90,7 @@
       <div class="bkFFFFFF p30 bs br4 table-box">
         <div class="fw title">预计补仓</div>
         <el-table
-          :data="tableData"
+          :data="CoverTableData"
           style="width: 100%">
           <el-table-column
             label="序号"
@@ -136,7 +136,44 @@
     name: "Home",
     data(){
       return {
-        tableData: [
+        //上次登录时间
+        login_record_ip: '',
+        //上次登录ip
+        login_record_created_at: '',
+        //机器人总算
+        total_robot_amount: '',
+        //数量
+        total_profit_amount: '',
+        //币种
+        total_profit_currency: '',
+        //运行中
+        run_status_running: '',
+        //暂停中
+        run_status_stop: '',
+        //异常
+        run_status_warning: '',
+        //预计平仓表格数据
+        CloseOutTableData: [
+          {
+            date: '2016-05-02',
+            name: '王小虎',
+            address: '上海市'
+          }, {
+            date: '2016-05-04',
+            name: '王小虎',
+            address: '上海市'
+          }, {
+            date: '2016-05-01',
+            name: '王小虎',
+            address: '上海市'
+          }, {
+            date: '2016-05-03',
+            name: '王小虎',
+            address: '上海市'
+          }
+        ],
+        //预计补仓表格数据
+        CoverTableData: [
           {
             date: '2016-05-02',
             name: '王小虎',
@@ -163,12 +200,88 @@
     mounted(){
       this.$nextTick(() => {
         this.chartConf();
+        this.getHeadData();
+        this.getEarningsData();
       })
     },
     methods: {
+      //获得上方统计的数据
+      getHeadData(){
+        let data = {
+          "login_record": {
+            "ip": "127.0.0.1",
+            "created_at": "2019-10-24 16:32:58"
+          },
+          "total_robot_amount": "10",
+          "total_profit_amount": {
+            "currency": "USDT",
+            "amount": "3.00002132"
+          },
+          "run_status": {
+            "running": 42,
+            "stop": 16,
+            "warning": 7
+          }
+        };
+
+        this.login_record_ip = data.login_record.ip;
+        this.login_record_created_at = data.login_record.created_at;
+        this.total_robot_amount = data.total_robot_amount;
+        this.total_profit_amount = data.total_profit_amount.amount;
+        this.total_profit_currency = data.total_profit_amount.currency;
+        this.run_status_running = data.run_status.running;
+        this.run_status_stop = data.run_status.stop;
+        this.run_status_warning = data.run_status.warning;
+      },
+
+      //获得收益曲线数据
+      getEarningsData(){
+        let data = {
+          "income_chart": {
+            "data": [
+              {
+                "currency": "BTC",
+                "data": {
+                  "2019-09-29": "0.00000000",
+                  "2019-09-30": "0.00000000",
+                  "2019-10-01": "0.00000000",
+                }
+              },
+              {
+                "currency": "USDT",
+                "data": {
+                  "2019-09-29": "0.00000000",
+                  "2019-09-30": "0.00000000",
+                  "2019-10-01": "0.00000000",
+                  "2019-10-02": "0.00000000",
+                }
+              }
+            ]
+          }
+        };
+
+        let arr = data.income_chart.data;
+        let legendArr = [];
+        let xAxisArr = [];
+        let seriesArr = [];
+        arr.forEach(item => {
+          item.xAxisArr = Object.keys(item.data);
+          item.valueArr = Object.values(item.data);
+          let obj = {
+            name: item.currency,
+            type: 'line',
+            smooth: true,
+            data: item.valueArr
+          };
+          legendArr.push(item.currency);
+          xAxisArr.push(item.xAxisArr);
+          seriesArr.push(obj);
+        });
+        this.chartConf(legendArr, xAxisArr, seriesArr)
+      },
 
       //配置收益曲线图表
-      chartConf(){
+      chartConf(legendArr, xAxisArr, seriesArr){
         this.charts = echarts.init(document.getElementById('earningsChart'));
         let option = {
           title: {
@@ -190,10 +303,10 @@
             icon: 'circle',
             itemGap: 40,
             itemWidth: 8,
-            data: ['BTC', 'USDT'],
+            data: legendArr,
             textStyle: {
               color: '#B2B2B2',
-              padding: [3,1,1,1]
+              padding: [3, 1, 1, 1]
             }
           },
           grid: {
@@ -211,7 +324,7 @@
               }
             },
 
-            data: ['0101', '0201', '0301', '0401', '0501', '0601', '0701']
+            data: xAxisArr,
           },
           yAxis: {
             type: 'value',
@@ -228,21 +341,7 @@
               show: false
             },
           },
-          series: [
-            {
-              name: 'BTC',
-              type: 'line',
-              smooth: true,
-              data: [120, 132, 101, 134, 90, 230, 210]
-            },
-            {
-              name: 'USDT',
-              type: 'line',
-              smooth: true,
-              data: [220, 182, 191, 234, 290, 330, 310]
-            }
-
-          ],
+          series: seriesArr,
           color: ['#365CD9', '#FF2E2E', '#6B48FF', '#FFD058', '#43C1EA', '#12E58E'],
         };
         this.charts.setOption(option);
