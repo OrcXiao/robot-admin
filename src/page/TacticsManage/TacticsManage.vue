@@ -57,7 +57,7 @@
         <div>自定义策略</div>
         <div>
           <el-button
-            @click="isShowAddTacticsDialog = true"
+            @click="clickAddBtn"
             icon="el-icon-circle-plus-outline"
             type="primary">添加自定义策略
           </el-button>
@@ -536,6 +536,16 @@
 
           }
         })
+      },
+
+      //点击'添加自定义策略'按钮
+      clickAddBtn(){
+        this.isShowAddTacticsDialog = true;
+      },
+
+      //点击'修改'按钮
+      clickEditBtn(row){
+
       },
 
       //点击'删除'按钮

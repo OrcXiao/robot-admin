@@ -182,7 +182,7 @@
       width="1000px">
       <el-table
         border
-        :data="EarningsDetailsTableData"
+        :data="earningsDetailsTableData"
         style="width: 100%">
         <el-table-column
           label="序号"
@@ -318,6 +318,8 @@
     name: "RobotDetails",
     data(){
       return {
+        //类型
+        type: '',
         //类型候选项
         typeOptions: [],
         //初始表格数据
@@ -342,6 +344,8 @@
         ],
         //显示收益弹框
         isShowEarningsDialog: false,
+        //策略候选项数组
+        tacticsOptions: [],
         //收益表格数据
         earningsTableData: [
           {
@@ -388,7 +392,7 @@
               trigger: 'blur'
             },
           ],
-          percentage:[
+          percentage: [
             {
               required: true,
               validator: this.$verifys.nullStr({item: '网格清仓百分比'}),
@@ -400,7 +404,7 @@
         //显示闪电平仓弹框
         isShowCloseAPositionDialog: false,
         //闪电平仓
-        CloseAPositObj:{
+        CloseAPositObj: {
           id: '',
           //仓位
           shipping: '',
