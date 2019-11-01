@@ -30,6 +30,7 @@ axios.interceptors.response.use(res => {
   },
   error => {
     return Promise.resolve(error);
+    
   }
 );
 

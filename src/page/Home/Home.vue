@@ -60,29 +60,32 @@
             width="50"
             align="center">
           </el-table-column>
-
           <el-table-column
-            prop="date"
+            prop="robot_name"
             label="机器人">
           </el-table-column>
           <el-table-column
             prop="name"
             label="币对">
+            <template slot-scope="scope">
+              {{scope.row.base_currency}}/
+              {{scope.row.quote_currency}}
+            </template>
           </el-table-column>
           <el-table-column
-            prop="address"
+            prop="type_zh"
             label="类型">
           </el-table-column>
           <el-table-column
-            prop="address"
+            prop="income_rate"
             label="当前收益率">
           </el-table-column>
           <el-table-column
-            prop="address"
+            prop="currency_amount"
             label="仓位">
           </el-table-column>
           <el-table-column
-            prop="address"
+            prop="income_rate_flag"
             label="目标率">
           </el-table-column>
         </el-table>
@@ -100,27 +103,34 @@
           </el-table-column>
 
           <el-table-column
-            prop="date"
+            prop="robot_name"
             label="机器人">
           </el-table-column>
           <el-table-column
             prop="name"
             label="币对">
+            <template slot-scope="scope">
+              {{scope.row.base_currency}}/
+              {{scope.row.quote_currency}}
+            </template>
           </el-table-column>
           <el-table-column
-            prop="address"
+            prop="type_zh"
             label="类型">
           </el-table-column>
           <el-table-column
-            prop="address"
+            prop="income_rate"
             label="当前收益率">
+            <template slot-scope="scope">
+              {{scope.row.income_rate}} %
+            </template>
           </el-table-column>
           <el-table-column
-            prop="address"
+            prop="currency_amount"
             label="仓位">
           </el-table-column>
           <el-table-column
-            prop="address"
+            prop="income_rate_flag"
             label="目标率">
           </el-table-column>
         </el-table>
@@ -153,45 +163,9 @@
         //异常
         run_status_warning: '',
         //预计平仓表格数据
-        CloseOutTableData: [
-          {
-            date: '2016-05-02',
-            name: '王小虎',
-            address: '上海市'
-          }, {
-            date: '2016-05-04',
-            name: '王小虎',
-            address: '上海市'
-          }, {
-            date: '2016-05-01',
-            name: '王小虎',
-            address: '上海市'
-          }, {
-            date: '2016-05-03',
-            name: '王小虎',
-            address: '上海市'
-          }
-        ],
+        CloseOutTableData: [],
         //预计补仓表格数据
-        CoverTableData: [
-          {
-            date: '2016-05-02',
-            name: '王小虎',
-            address: '上海市'
-          }, {
-            date: '2016-05-04',
-            name: '王小虎',
-            address: '上海市'
-          }, {
-            date: '2016-05-01',
-            name: '王小虎',
-            address: '上海市'
-          }, {
-            date: '2016-05-03',
-            name: '王小虎',
-            address: '上海市'
-          }
-        ]
+        CoverTableData: []
       }
     },
     computed: {},
@@ -202,6 +176,7 @@
         this.chartConf();
         this.getHeadData();
         this.getEarningsData();
+        this.getTableData();
       })
     },
     methods: {
@@ -347,10 +322,42 @@
         this.charts.setOption(option);
       },
 
+      //获取表格的数据
+      getTableData(){
+        let data = {
+          "expected_buy": [
+            {
+              "robot_name": "机器人名称",
+              "base_currency": "ETH",
+              "quote_currency": "USDT",
+              "income_rate": "0",
+              "type_zh": "做多",
+              "currency_amount": "0.00000000",
+              "currency": "eth",
+              "income_rate_flag": "4"
+            }
+          ],
+          "expected_sell": [
+            {
+              "robot_name": "机器人名称",
+              "base_currency": "ETH",
+              "quote_currency": "USDT",
+              "income_rate": "0",
+              "type_zh": "做多",
+              "currency_amount": "0.00000000",
+              "currency": "eth",
+              "income_rate_flag": "4"
+            }
+          ]
+        };
+        this.CloseOutTableData = data.expected_sell;
+        this.CoverTableData = data.expected_buy;
+      },
+
       //点击跳转
       jumpPath(url){
         this.$router.push(url);
-      }
+      },
 
     },
     props: {},
@@ -429,6 +436,7 @@
         }
 
         th > div{
+          padding-left: 0 !important;
           color: #BFBFBF;
         }
 

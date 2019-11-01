@@ -8,7 +8,9 @@
         <Vheader></Vheader>
       </el-header>
       <el-main>
-        <router-view/>
+        <transition name="pageswitching">
+          <router-view/>
+        </transition>
       </el-main>
     </el-container>
   </el-container>
@@ -18,7 +20,7 @@
   import Vheader from '../header/Vheader';
   import Vnav    from '../nav/Vnav';
   export default {
-    name: "admin",
+    name: "layout",
     data(){
       return {}
     },
@@ -32,7 +34,6 @@
     },
     methods: {},
     props: {},
-    watch: {},
     mixins: [],
     filters: {},
     components: {
@@ -42,6 +43,7 @@
 </script>
 
 <style scoped lang="scss">
+
   .el-header{
     padding: 0;
     border-bottom: 1px solid #e1e2e7;
@@ -59,4 +61,27 @@
     padding: 30px;
     background: #f5f6fa;
   }
+
+  /*
+  * transition --- 页面切换的过度效果..
+  */
+  .pageswitching-enter-active,
+  .pageswitching-leave-active{
+    transition: all .3s;
+  }
+
+  .pageswitching-enter,
+  .pageswitching-leave-active{
+    opacity: 0;
+    transform: translateX(20px);
+  }
+
+  .pageswitching-move{
+    transition: all .3s;
+  }
+
+  .pageswitching-leave-active{
+    position: absolute;
+  }
+
 </style>
