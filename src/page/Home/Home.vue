@@ -77,8 +77,10 @@
             label="类型">
           </el-table-column>
           <el-table-column
-            prop="income_rate"
             label="当前收益率">
+            <template slot-scope="scope">
+              {{scope.row.income_rate}} %
+            </template>
           </el-table-column>
           <el-table-column
             prop="currency_amount"
@@ -119,7 +121,6 @@
             label="类型">
           </el-table-column>
           <el-table-column
-            prop="income_rate"
             label="当前收益率">
             <template slot-scope="scope">
               {{scope.row.income_rate}} %

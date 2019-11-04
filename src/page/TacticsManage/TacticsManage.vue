@@ -316,7 +316,7 @@
           callback(new Error('输入的最大数不能超过999.99'));
         }
         else if(this.ZhiYingBiLiArr.includes('')){
-          callback(new Error('请输入所有的之盈比例'));
+          callback(new Error('请输入所有的止盈比例'));
         }
         else{
           callback();

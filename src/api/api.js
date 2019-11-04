@@ -1,22 +1,21 @@
 import axios from './index';
-
 const api = {
   //登录页
   Login: {
     login(params){
-    
+      return axios.post('api/login', params);
     }
   },
   //首页
   Home: {
     head(params){
-      axios.get('/api/main/head', params);
+      return axios.get('/api/main/head', params);
     },
     central(params){
-      axios.get('/api/main/central', params);
+      return axios.get('/api/main/central', params);
     },
     bottom(params){
-      axios.get('/api/main/bottom', params);
+      return axios.get('/api/main/bottom', params);
     },
   },
   //API管理

@@ -35,7 +35,6 @@
       </div>
     </div>
   </div>
-
 </template>
 
 <script>
@@ -44,7 +43,7 @@
     data(){
       return {
         login: {
-          user: '',
+          user: '18888888888',
           pass: '',
         },
         loginRules: {
@@ -69,17 +68,27 @@
     created(){
     },
     mounted(){
-      //this.$ nextTick(() => {
-
-      //})
+      this.$nextTick(() => {
+        //清空登录token
+        localStorage.clear();
+      })
     },
     methods: {
       //点击登录按钮
       submit(formName){
         this.$refs[formName].validate((valid) => {
           if(valid){
-            this.$router.push('/home');
-            this.$common.successHint('登录成功');
+            let params = {
+              username: this.login.user,
+              password: this.login.pass,
+            };
+            this.$api.Login.login(params).then(res => {
+              if(res.data && res.data.status === 1000){
+                localStorage.setItem('RobotAdminSystemLoginToken', res.data.data.access_token);
+                this.$router.push('/home');
+                this.$common.successHint('登录成功');
+              }
+            });
           }
         });
       },
