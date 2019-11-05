@@ -183,77 +183,46 @@
     methods: {
       //获得上方统计的数据
       getHeadData(){
-        let data = {
-          "login_record": {
-            "ip": "127.0.0.1",
-            "created_at": "2019-10-24 16:32:58"
-          },
-          "total_robot_amount": "10",
-          "total_profit_amount": {
-            "currency": "USDT",
-            "amount": "3.00002132"
-          },
-          "run_status": {
-            "running": 42,
-            "stop": 16,
-            "warning": 7
+        this.$api.Home.head().then(res => {
+          if(res.data && res.data.status === 1000){
+            let data = res.data.data;
+            this.login_record_ip = data.login_record.ip;
+            this.login_record_created_at = data.login_record.created_at;
+            this.total_robot_amount = data.total_robot_amount;
+            this.total_profit_amount = data.total_profit_amount.amount;
+            this.total_profit_currency = data.total_profit_amount.currency;
+            this.run_status_running = data.run_status.running;
+            this.run_status_stop = data.run_status.stop;
+            this.run_status_warning = data.run_status.warning;
           }
-        };
-
-        this.login_record_ip = data.login_record.ip;
-        this.login_record_created_at = data.login_record.created_at;
-        this.total_robot_amount = data.total_robot_amount;
-        this.total_profit_amount = data.total_profit_amount.amount;
-        this.total_profit_currency = data.total_profit_amount.currency;
-        this.run_status_running = data.run_status.running;
-        this.run_status_stop = data.run_status.stop;
-        this.run_status_warning = data.run_status.warning;
+        });
       },
 
       //获得收益曲线数据
       getEarningsData(){
-        let data = {
-          "income_chart": {
-            "data": [
-              {
-                "currency": "BTC",
-                "data": {
-                  "2019-09-29": "0.00000000",
-                  "2019-09-30": "0.00000000",
-                  "2019-10-01": "0.00000000",
-                }
-              },
-              {
-                "currency": "USDT",
-                "data": {
-                  "2019-09-29": "0.00000000",
-                  "2019-09-30": "0.00000000",
-                  "2019-10-01": "0.00000000",
-                  "2019-10-02": "0.00000000",
-                }
-              }
-            ]
+        this.$api.Home.central().then(res => {
+          if(res.data && res.data.status === 1000){
+            let data = res.data.data;
+            let arr = data.income_chart.data;
+            let legendArr = [];
+            let xAxisArr = [];
+            let seriesArr = [];
+            arr.forEach(item => {
+              item.xAxisArr = Object.keys(item.data);
+              item.valueArr = Object.values(item.data);
+              let obj = {
+                name: item.currency,
+                type: 'line',
+                smooth: true,
+                data: item.valueArr
+              };
+              legendArr.push(item.currency);
+              xAxisArr.push(item.xAxisArr);
+              seriesArr.push(obj);
+            });
+            this.chartConf(legendArr, xAxisArr, seriesArr)
           }
-        };
-
-        let arr = data.income_chart.data;
-        let legendArr = [];
-        let xAxisArr = [];
-        let seriesArr = [];
-        arr.forEach(item => {
-          item.xAxisArr = Object.keys(item.data);
-          item.valueArr = Object.values(item.data);
-          let obj = {
-            name: item.currency,
-            type: 'line',
-            smooth: true,
-            data: item.valueArr
-          };
-          legendArr.push(item.currency);
-          xAxisArr.push(item.xAxisArr);
-          seriesArr.push(obj);
         });
-        this.chartConf(legendArr, xAxisArr, seriesArr)
       },
 
       //配置收益曲线图表
@@ -325,34 +294,13 @@
 
       //获取表格的数据
       getTableData(){
-        let data = {
-          "expected_buy": [
-            {
-              "robot_name": "机器人名称",
-              "base_currency": "ETH",
-              "quote_currency": "USDT",
-              "income_rate": "0",
-              "type_zh": "做多",
-              "currency_amount": "0.00000000",
-              "currency": "eth",
-              "income_rate_flag": "4"
-            }
-          ],
-          "expected_sell": [
-            {
-              "robot_name": "机器人名称",
-              "base_currency": "ETH",
-              "quote_currency": "USDT",
-              "income_rate": "0",
-              "type_zh": "做多",
-              "currency_amount": "0.00000000",
-              "currency": "eth",
-              "income_rate_flag": "4"
-            }
-          ]
-        };
-        this.CloseOutTableData = data.expected_sell;
-        this.CoverTableData = data.expected_buy;
+        this.$api.Home.bottom().then(res => {
+          if(res.data && res.data.status === 1000){
+            let data = res.data.data;
+            this.CloseOutTableData = data.expected_sell;
+            this.CoverTableData = data.expected_buy;
+          }
+        });
       },
 
       //点击跳转

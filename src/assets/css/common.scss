@@ -8,7 +8,7 @@
 
 html, body, #app{
   width: 100%;
-  height: 100%;
+  height: 100vh;
   font-size: 100%;
   box-sizing: border-box;
 }
@@ -35,9 +35,17 @@ li{
   border-radius: 4px;
 }
 
-//文档水平对齐
+//文档对齐
+.tl{
+  text-align: left;
+}
+
 .tc{
   text-align: center;
+}
+
+.tr{
+  text-align: right;
 }
 
 //显示手型
@@ -123,6 +131,10 @@ li{
 }
 
 //字体大小
+.fs12{
+  font-size: 12px;
+}
+
 .fs14{
   font-size: 14px;
 }
@@ -194,6 +206,10 @@ li{
 
 .cl9696AE{
   color: #9696AE;
+}
+
+.cl666666{
+  color: #666666;
 }
 
 

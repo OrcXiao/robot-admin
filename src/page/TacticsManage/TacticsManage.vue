@@ -4,7 +4,7 @@
       <div class="ptb20">系统策略</div>
       <el-table
         border
-        :data="tableData"
+        :data="systemTableData"
         style="width: 100%">
         <el-table-column
           label="序号"
@@ -12,32 +12,30 @@
           width="50"
           align="center">
         </el-table-column>
-
         <el-table-column
-          prop="date"
+          prop="name"
           label="名称"
           width="180">
         </el-table-column>
-        <el-table-column
-          prop="name"
-          label="追踪止盈"
-          width="180">
+        <el-table-column label="追踪止盈">
           <template slot-scope="scope">
-            <el-switch v-model="systemStopProfit"></el-switch>
+            <el-switch
+              @change="changeSwitch($event, scope.row.id, 'tracking_profit_switch')"
+              v-model="scope.row.other_config.tracking_profit_switch"></el-switch>
           </template>
         </el-table-column>
-        <el-table-column
-          prop="address"
-          label="防瀑布">
+        <el-table-column label="防瀑布">
           <template slot-scope="scope">
-            <el-switch v-model="systemWaterfall"></el-switch>
+            <el-switch
+              @change="changeSwitch($event, scope.row.id, 'flood_switch')"
+              v-model="scope.row.other_config.flood_switch"></el-switch>
           </template>
         </el-table-column>
-        <el-table-column
-          prop="address"
-          label="网格">
+        <el-table-column label="网格">
           <template slot-scope="scope">
-            <el-switch v-model="systemGrid"></el-switch>
+            <el-switch
+              @change="changeSwitch($event, scope.row.id, 'grid_switch')"
+              v-model="scope.row.other_config.grid_switch"></el-switch>
           </template>
         </el-table-column>
         <el-table-column
@@ -65,7 +63,7 @@
       </div>
       <el-table
         border
-        :data="tableData"
+        :data="customTableData"
         style="width: 100%">
         <el-table-column
           label="序号"
@@ -75,30 +73,23 @@
         </el-table-column>
 
         <el-table-column
-          prop="date"
+          prop="name"
           label="名称"
           width="180">
         </el-table-column>
-        <el-table-column
-          prop="name"
-          label="追踪止盈"
-          width="180">
+        <el-table-column label="追踪止盈">
           <template slot-scope="scope">
-            <el-switch v-model="customStopProfit"></el-switch>
+            <el-switch v-model="scope.row.tracking_profit_switch"></el-switch>
           </template>
         </el-table-column>
-        <el-table-column
-          prop="address"
-          label="防瀑布">
+        <el-table-column label="防瀑布">
           <template slot-scope="scope">
-            <el-switch v-model="customWaterfall"></el-switch>
+            <el-switch v-model="scope.row.flood_switch"></el-switch>
           </template>
         </el-table-column>
-        <el-table-column
-          prop="address"
-          label="网格">
+        <el-table-column label="网格">
           <template slot-scope="scope">
-            <el-switch v-model="customGrid"></el-switch>
+            <el-switch v-model="scope.row.grid_switch"></el-switch>
           </template>
         </el-table-column>
         <el-table-column
@@ -118,6 +109,14 @@
           </template>
         </el-table-column>
       </el-table>
+      <el-pagination
+        @size-change="Mixin_handleSizeChange"
+        @current-change="Mixin_handleCurrentChange"
+        :page-size="per_page"
+        layout="total, prev, pager, next, jumper"
+        :total="customTableDataLength">
+      </el-pagination>
+
     </div>
 
 
@@ -377,26 +376,22 @@
       };
 
       return {
-        tableData: [
-          {
-            date: '2016-05-02',
-            name: '王小虎',
-            address: '上海市'
-          }
-        ],
-        //系统追踪止盈
-        systemStopProfit: false,
-        //系统防瀑布
-        systemWaterfall: false,
-        //系统防网格
-        systemGrid: false,
+        //翻页序号
+        page: 1,
+        //表格每页大小
+        per_page: 10,
+        //系统策略表格数据
+        systemTableData: [],
+        //自定义策略表格数据
+        customTableData: [],
+        //自定义策略表格数据总数
+        customTableDataLength: 0,
         //自定义追踪止盈
         customStopProfit: false,
         //自定义防瀑布
         customWaterfall: false,
         //自定义防网格
         customGrid: false,
-
         //显示自定义弹框
         isShowAddTacticsDialog: false,
         //网格开启或关闭条件候选项
@@ -514,18 +509,38 @@
         //初始弹框宽度
         widthVal: 1000,
 
-
       }
     },
     computed: {},
     created(){
     },
     mounted(){
-      //this.$ nextTick(() => {
-
-      //})
+      this.$nextTick(() => {
+        this.initData();
+      })
     },
     methods: {
+      //获取策略列表
+      initData(){
+        let params = {
+          page: this.page,
+          per_page: this.per_page,
+        };
+        this.$api.TacticsManage.tacticsList(params).then(res => {
+          if(res.data && res.data.status === 1000){
+            let data = res.data.data;
+            this.systemTableData = data.sys_strategy;
+            this.customTableData = data.strategy.data;
+            this.customTableDataLength = data.strategy.total;
+          }
+        });
+      },
+
+      //切换表格中的开关
+      changeSwitch(event, id, type){
+
+      },
+
       //提交新增
       submitAdd(formName){
         this.$refs[formName].validate((valid) => {

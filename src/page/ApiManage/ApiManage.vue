@@ -18,12 +18,16 @@
         align="center">
       </el-table-column>
       <el-table-column
-        prop="date"
+        prop="organize_zh"
         label="交易所">
       </el-table-column>
       <el-table-column
-        prop="name"
+        prop="key"
         label="Key">
+      </el-table-column>
+      <el-table-column
+        prop="created_at"
+        label="创建时间">
       </el-table-column>
       <el-table-column
         width="220"
@@ -39,19 +43,9 @@
             icon="el-icon-circle-close"
             type="danger">删除
           </el-button>
-
         </template>
       </el-table-column>
     </el-table>
-    <el-pagination
-      @size-change="Mixin_handleSizeChange"
-      @current-change="Mixin_handleCurrentChange"
-      :current-page="4"
-      :page-sizes="[10, 20, 50]"
-      :page-size="10"
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="70">
-    </el-pagination>
 
     <!--添加和修改api弹框-->
     <el-dialog
@@ -66,21 +60,24 @@
         :rules="apiObjRules"
         ref="apiObj"
         label-position="right"
-        label-width="80px">
+        label-width="120px">
         <el-form-item label="平台" prop="platform">
           <el-select style="width: 100%" v-model="apiObj.platform" placeholder="请选择平台">
             <el-option
-              v-for="item in platformOptions"
-              :key="item.id"
-              :label="item.name"
+              v-for="(item, index) in platformOptions"
+              :key="index"
+              :label="item.text"
               :value="item.id"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="KEY" prop="key">
-          <el-input v-model="apiObj.key" placeholder="请输入KEY"></el-input>
+        <el-form-item label="key" prop="key">
+          <el-input v-model="apiObj.key" placeholder="请输入key"></el-input>
         </el-form-item>
-        <el-form-item label="SECRET" prop="secret">
-          <el-input v-model="apiObj.secret" placeholder="请输入SECRET"></el-input>
+        <el-form-item label="secret" prop="secret">
+          <el-input v-model="apiObj.secret" placeholder="请输入secret"></el-input>
+        </el-form-item>
+        <el-form-item v-if="apiObj.platform === 'okex'" label="passphrase" prop="passphrase">
+          <el-input v-model="apiObj.passphrase" placeholder="请输入passphrase"></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -96,54 +93,24 @@
   export default {
     name: "ApiManage",
     data(){
-      let validatorKey = (rule, value, callback) => {
-        if(isNaN(value)){
-          callback(new Error('请输入数字'));
-        }
-        else{
-          callback();
-        }
-      };
-      let validatorSecret = (rule, value, callback) => {
-        if(isNaN(value)){
-          callback(new Error('请输入数字'));
-        }
-        else{
-          callback();
-        }
-      };
-
       return {
-        tableData: [
-          {
-            date: '2016-05-02',
-            name: '王小虎',
-            address: '上海市'
-          }, {
-            date: '2016-05-04',
-            name: '王小虎',
-            address: '上海市'
-          }, {
-            date: '2016-05-01',
-            name: '王小虎',
-            address: '上海市'
-          }, {
-            date: '2016-05-03',
-            name: '王小虎',
-            address: '上海市'
-          }
-        ],
+        tableData: [],
         //显示弹框
         isShowAddOrEditDialog: false,
         //平台候选项
         platformOptions: [],
         //当前操作类型
         currentHandleType: '',
+        //克隆空对象
+        cloneApiObj: {},
+        //操作的apiId
+        apiId: '',
         //api对象
         apiObj: {
           platform: '',
           key: '',
           secret: '',
+          passphrase: '',
         },
         apiObjRules: {
           platform: [
@@ -156,30 +123,23 @@
           key: [
             {
               required: true,
-              validator: this.$verifys.nullStr({item: 'KEY'}),
+              validator: this.$verifys.nullStr({item: 'key'}),
               trigger: 'blur'
             },
-            /*
-             {
-             required: true,
-             validator: validatorKey,
-             trigger: 'blur'
-             }
-             */
           ],
           secret: [
             {
               required: true,
-              validator: this.$verifys.nullStr({item: 'SECRET'}),
+              validator: this.$verifys.nullStr({item: 'secret'}),
               trigger: 'blur'
             },
-            /*
-             {
-             required: true,
-             validator: validatorSecret,
-             trigger: 'blur'
-             }
-             */
+          ],
+          passphrase: [
+            {
+              required: true,
+              validator: this.$verifys.nullStr({item: 'passphrase'}),
+              trigger: 'blur'
+            },
           ]
         }
       }
@@ -188,23 +148,54 @@
     created(){
     },
     mounted(){
-      //this.$ nextTick(() => {
-
-      //})
+      this.$nextTick(() => {
+        this.cloneApiObj = Object.assign({}, this.apiObj);
+        this.getPlatformList();
+        this.initData();
+      })
     },
     methods: {
+      //获取平台列表
+      getPlatformList(){
+        this.$api.ApiManage.organizes().then(res => {
+          if(res.data && res.data.status === 1000){
+            let data = res.data.data;
+            for(let item in data){
+              let obj = {
+                id: item,
+                text: data[item],
+              };
+              this.platformOptions.push(obj);
+            }
+          }
+        });
+      },
+
       //获取表格数据
       initData(){
+        this.$api.ApiManage.apiList().then(res => {
+          if(res.data && res.data.status === 1000){
+            this.tableData = res.data.data;
+          }
+        });
       },
 
       //点击'新增'按钮
       clickAddBtn(){
+        if(!this.platformOptions.length){
+          this.$common.errorHint('当前平台的选项为空, 无法添加');
+          return
+        }
+        this.apiObj = this.cloneApiObj;
         this.currentHandleType = 'add';
         this.isShowAddOrEditDialog = true;
       },
 
       //点击'修改'按钮
       clickEditBtn(row){
+        this.apiId = row.id;
+        this.apiObj.key = row.key;
+        this.apiObj.platform = row.organize;
         this.currentHandleType = 'edit';
         this.isShowAddOrEditDialog = true;
       },
@@ -216,7 +207,12 @@
           cancelButtonText: '取消',
           type: 'error'
         }).then(() => {
-
+          this.$api.ApiManage.removeApi(row.id).then(res => {
+            if(res.data && res.data.status === 1000){
+              this.$common.successHint('api删除成功');
+              this.initData();
+            }
+          });
         }).catch(() => {
         })
       },
@@ -228,6 +224,21 @@
             return false;
           }
           else{
+            let params = {
+              organize: this.apiObj.platform,
+              key: this.apiObj.key,
+              secret: this.apiObj.secret,
+            };
+            if(this.apiObj.platform === 'okex'){
+              params.passphrase = this.apiObj.passphrase;
+            }
+            this.$api.ApiManage.addApi(params).then(res => {
+              if(res.data && res.data.status === 1000){
+                this.isShowAddOrEditDialog = false;
+                this.$common.successHint('api新增成功');
+                this.initData();
+              }
+            });
 
           }
         })
@@ -240,6 +251,22 @@
             return false;
           }
           else{
+            let params = {
+              id: this.apiId,
+              organize: this.apiObj.platform,
+              key: this.apiObj.key,
+              secret: this.apiObj.secret,
+            };
+            if(this.apiObj.platform === 'okex'){
+              params.passphrase = this.apiObj.passphrase;
+            }
+            this.$api.ApiManage.updateApi(params).then(res => {
+              if(res.data && res.data.status === 1000){
+                this.isShowAddOrEditDialog = false;
+                this.$common.successHint('api修改成功');
+                this.initData();
+              }
+            });
 
           }
         })

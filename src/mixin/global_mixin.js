@@ -5,20 +5,20 @@ const globalMixins = {
   methods: {
     //改变每页显示数量
     Mixin_handleSizeChange(val){
-      this.currentPage = 1;
-      this.pageSize = val || 10;
+      this.page = 1;
+      this.per_page = val || 10;
       this.initData();
     },
     
     //跳转第几页
     Mixin_handleCurrentChange(val){
-      this.currentPage = val;
+      this.page = val;
       this.initData();
     },
     
     //选择条件之后..
     Mixin_filterCondition(){
-      this.currentPage = 1;
+      this.page = 1;
       this.initData();
     },
     
