@@ -4,11 +4,13 @@
       <span class="pr20">交易所 :</span>
       <el-input
         style="width: 150px;"
-        class="pr20"
+        clearable
+        v-model="organize"
         placeholder="请输入交易所">
       </el-input>
-      <el-button>搜索</el-button>
+      <el-button class="ml20" @click="initData">搜索</el-button>
       <el-button
+        class="ml20"
         @click="clickAddBtn"
         icon="el-icon-circle-plus-outline"
         type="primary">添加机器人
@@ -25,27 +27,29 @@
         align="center">
       </el-table-column>
       <el-table-column
-        prop="date"
+        prop="name"
         label="机器人">
       </el-table-column>
       <el-table-column
-        prop="name"
+        prop="organize_zh"
         label="交易所">
       </el-table-column>
       <el-table-column
-        prop="name"
+        prop="plan_type_zh"
         label="策略">
       </el-table-column>
-      <el-table-column
-        prop="name"
-        label="止盈出场">
+      <el-table-column label="止盈出场">
+        <template slot-scope="scope">
+          <el-switch :active-value="2" :inactive-value="1" v-model="scope.row.profit_end"></el-switch>
+        </template>
+      </el-table-column>
+      <el-table-column label="停止补仓">
+        <template slot-scope="scope">
+          <el-switch :active-value="2" :inactive-value="1" v-model="scope.row.stop_open_position"></el-switch>
+        </template>
       </el-table-column>
       <el-table-column
-        prop="name"
-        label="停止补仓">
-      </el-table-column>
-      <el-table-column
-        prop="name"
+        prop="status_zh"
         label="状态">
       </el-table-column>
       <el-table-column
@@ -85,11 +89,9 @@
     <el-pagination
       @size-change="Mixin_handleSizeChange"
       @current-change="Mixin_handleCurrentChange"
-      :current-page="4"
-      :page-sizes="[10, 20, 50]"
-      :page-size="10"
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="70">
+      :page-size="per_page"
+      layout="total, prev, pager, next, jumper"
+      :total="tableDataLength">
     </el-pagination>
 
     <!--添加和修改机器人弹框-->
@@ -113,7 +115,7 @@
             <el-option
               v-for="(item, index) in bourseOptions"
               :key="index"
-              :label="item.name"
+              :label="item.text"
               :value="item.id">
             </el-option>
           </el-select>
@@ -202,25 +204,16 @@
     name: "Robot",
     data(){
       return {
-        tableData: [
-          {
-            date: '2016-05-02',
-            name: '王小虎',
-            address: '上海市'
-          }, {
-            date: '2016-05-04',
-            name: '王小虎',
-            address: '上海市'
-          }, {
-            date: '2016-05-01',
-            name: '王小虎',
-            address: '上海市'
-          }, {
-            date: '2016-05-03',
-            name: '王小虎',
-            address: '上海市'
-          }
-        ],
+        //翻页序号
+        page: 1,
+        //表格每页大小
+        per_page: 10,
+        //表格数据
+        tableData: [],
+        //表格数据总数
+        tableDataLength: 0,
+        //要搜索的平台
+        organize: '',
         //是否显示弹框
         isShowAddOrEditDialog: false,
         //当前操作类型
@@ -351,7 +344,9 @@
               trigger: 'blur'
             },
           ],
-        }
+        },
+        //所有的选项数据
+        allOptionsData: [],
 
       }
     },
@@ -359,11 +354,54 @@
     created(){
     },
     mounted(){
-      //this.$ nextTick(() => {
-
-      //})
+      this.$nextTick(() => {
+        this.initData();
+        this.getPlatformList();
+        this.getOptionData();
+      })
     },
     methods: {
+      //机器人列表
+      initData(){
+        let params = {
+          page: this.page,
+          per_page: this.per_page,
+          organize: this.organize,
+        };
+        this.$api.Robot.RobotList(params).then(res => {
+          if(res.data && res.data.status === 1000){
+            let data = res.data.data;
+            this.tableData = data.data;
+            this.tableDataLength = data.total;
+          }
+        });
+      },
+
+      //获取平台列表
+      getPlatformList(){
+        this.$api.ApiManage.organizes().then(res => {
+          if(res.data && res.data.status === 1000){
+            let data = res.data.data;
+            for(let item in data){
+              let obj = {
+                id: item,
+                text: data[item],
+              };
+              this.bourseOptions.push(obj);
+            }
+          }
+        });
+      },
+
+      //获得选项数据
+      getOptionData(){
+        this.$api.Robot.getOptionData().then(res => {
+          if(res.data && res.data.status === 1000){
+            let data = res.data.data;
+            console.log(data);
+          }
+        });
+      },
 
       //点击'添加'按钮
       clickAddBtn(){

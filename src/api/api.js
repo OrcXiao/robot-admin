@@ -67,12 +67,36 @@ const api = {
     },
     //策略详情
     tacticsDetails(params){
-      return axios.get('api/strategy', params);
+      return axios.get('api/strategy/' + params.id, params);
     },
-    
+    //添加策略
+    addTactics(params){
+      return axios.post('api/strategy', params);
+    },
+    //修改策略
+    editTactics(params){
+      return axios.patch('api/strategy/' + params.id, params);
+    },
+    //修改策略
+    removeTactics(params){
+      return axios.delete('api/strategy/' + params);
+    },
   },
   //机器人
-  Robot: {},
+  Robot: {
+    //机器人列表
+    RobotList(params){
+      return axios.get('api/robot', {params});
+    },
+    //获得选项数据
+    getOptionData(){
+      return axios.get('api/robot-coins');
+    },
+    //添加机器人
+    addRobot(params){
+      return axios.get('api/robot');
+    },
+  },
   //收益总览
   EarningsOverview: {},
   
