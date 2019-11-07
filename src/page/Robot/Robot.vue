@@ -40,12 +40,20 @@
       </el-table-column>
       <el-table-column label="止盈出场">
         <template slot-scope="scope">
-          <el-switch :active-value="2" :inactive-value="1" v-model="scope.row.profit_end"></el-switch>
+          <el-switch
+            @change="changSwitch(scope.row, 'profit_end')"
+            :active-value="2" :inactive-value="1"
+            v-model="scope.row.profit_end">
+          </el-switch>
         </template>
       </el-table-column>
       <el-table-column label="停止补仓">
         <template slot-scope="scope">
-          <el-switch :active-value="2" :inactive-value="1" v-model="scope.row.stop_open_position"></el-switch>
+          <el-switch
+            @change="changSwitch(scope.row, 'stop_open_position')"
+            :active-value="2" :inactive-value="1"
+            v-model="scope.row.stop_open_position">
+          </el-switch>
         </template>
       </el-table-column>
       <el-table-column
@@ -62,17 +70,17 @@
             type="success">修改
           </el-button>
           <el-button
+            v-if="scope.row.status === 1"
             @click="clickPauseBtn(scope.row)"
             icon="el-icon-video-pause"
             type="info">暂停
           </el-button>
-          <!--
-                    <el-button
-                      @click="clickStartBtn(scope.row)"
-                      icon="el-icon-video-play"
-                      type="info">启动
-                    </el-button>
-          -->
+          <el-button
+            v-if="scope.row.status === 3"
+            @click="clickStartBtn(scope.row)"
+            icon="el-icon-video-play"
+            type="info">启动
+          </el-button>
           <el-button
             @click="clickRemoveBtn(scope.row)"
             icon="el-icon-circle-close"
@@ -100,7 +108,7 @@
       @close="Mixin_closeDialog('robotObj', 'isShowAddOrEditDialog')"
       :visible.sync="isShowAddOrEditDialog"
       :append-to-body=true
-      width="500px">
+      width="520px">
       <el-form
         :model="robotObj"
         :rules="robotObjRules"
@@ -108,10 +116,14 @@
         label-position="right"
         label-width="140px">
         <el-form-item label="机器人名称 :" prop="name">
-          <el-input v-model="robotObj.name" placeholder="请输入机器人名称"></el-input>
+          <el-input style="width: 320px" v-model="robotObj.name" placeholder="请输入机器人名称"></el-input>
         </el-form-item>
         <el-form-item label="交易所 :" prop="bourse">
-          <el-select style="width: 320px" v-model="robotObj.bourse" placeholder="请选择交易所">
+          <el-select
+            @change="changeBourse"
+            style="width: 320px"
+            v-model="robotObj.bourse"
+            placeholder="请选择交易所">
             <el-option
               v-for="(item, index) in bourseOptions"
               :key="index"
@@ -120,63 +132,55 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="交易区 :" prop="tradingRange">
-          <el-select style="width: 320px" v-model="robotObj.tradingRange" placeholder="请选择交易区">
+        <el-form-item v-if="robotObj.bourse" label="交易区 :" prop="tradingRange">
+          <el-select
+            @change="changeTradingRange"
+            style="width: 320px"
+            v-model="robotObj.tradingRange"
+            placeholder="请选择交易区">
             <el-option
               v-for="(item, index) in tradingRangeOptions"
               :key="index"
-              :label="item.name"
-              :value="item.id">
+              :label="item.label"
+              :value="item.value">
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="持有的币种 :" prop="coin">
-          <el-checkbox-group v-model="robotObj.coin">
+        <el-form-item v-if="coinOptions.length" label="持有的币种 :" prop="coin">
+          <el-checkbox-group @change="changeCoin" v-model="robotObj.coin">
             <el-checkbox
               v-for="(item, index) in coinOptions"
               :key="index"
               name="type"
-              :label="item.id">
-              {{item.name}}
+              :label="item.value">
+              {{item.label}}
             </el-checkbox>
           </el-checkbox-group>
         </el-form-item>
-        <el-form-item label="交易币对 :" prop="MoneyFor">
+        <el-form-item v-if="MoneyForOptions.length" label="交易币对 :" prop="MoneyFor">
           <el-checkbox-group v-model="robotObj.MoneyFor">
             <el-checkbox
               v-for="(item, index) in MoneyForOptions"
               :key="index"
               :label="item.id"
               name="type">
-              {{item.name}}
+              {{item.symbol}}
             </el-checkbox>
           </el-checkbox-group>
         </el-form-item>
-        <el-form-item label="USDT本金 :" prop="USDT">
-          <el-input
-            @input.native="Mixin_commonLimitInput('robotObj.USDT', 9, 6)"
-            v-model="robotObj.USDT"
-            placeholder="请输入USDT本金"></el-input>
+        <el-form-item
+          v-for="(item, index) in robotObj.principalList"
+          :label="item.text + '本金 :'"
+          :key="index"
+          :prop="'principalList.' + index + '.value'"
+          :rules="{
+            required: true,
+            message: item.text + '不能为空',
+            trigger: 'blur',
+          }">
+          <el-input style="width: 320px" v-model="item.value" :placeholder="`请输入${item.text}本金`"></el-input>
           <div class="text-right">
-            <div class="cuso">USDT余额:{{USDTBalance}}</div>
-          </div>
-        </el-form-item>
-        <el-form-item label="BTC本金 :" prop="BTC">
-          <el-input
-            @input.native="Mixin_commonLimitInput('robotObj.BTC', 9, 6)"
-            v-model="robotObj.BTC"
-            placeholder="请输入BTC本金"></el-input>
-          <div class="text-right">
-            <div class="cuso">BTC余额:{{BTCBalance}}</div>
-          </div>
-        </el-form-item>
-        <el-form-item label="ETH本金 :" prop="ETH">
-          <el-input
-            @input.native="Mixin_commonLimitInput('robotObj.ETH', 9, 6)"
-            v-model="robotObj.ETH"
-            placeholder="请输入ETH本金"></el-input>
-          <div class="text-right">
-            <div class="cuso">ETH余额:{{ETHBalance}}</div>
+            <div class="cuso">{{item.text}}余额 : {{item.balance}}</div>
           </div>
         </el-form-item>
         <el-form-item label="策略 :" prop="tactics">
@@ -189,6 +193,7 @@
             </el-option>
           </el-select>
         </el-form-item>
+
       </el-form>
       <span slot="footer" class="dialog-footer">
 		    <el-button @click="isShowAddOrEditDialog = false">取 消</el-button>
@@ -223,39 +228,11 @@
         //交易区候选项数组
         tradingRangeOptions: [],
         //币种候选项数组
-        coinOptions: [
-          {
-            name: 'BTC',
-            id: 1
-          },
-          {
-            name: 'ETH',
-            id: 2
-          },
-          {
-            name: 'USDT',
-            id: 3
-          },
-        ],
+        coinOptions: [],
+        //所有的交易币对候选项
+        AllMoneyForOptions: [],
         //交易币对候选项数组
-        MoneyForOptions: [{
-          name: 'BTC',
-          id: 1
-        },
-          {
-            name: 'ETH',
-            id: 2
-          },
-          {
-            name: 'USDT',
-            id: 3
-          },],
-        //USDT余额
-        USDTBalance: '',
-        //BTC余额
-        BTCBalance: '',
-        //ETH余额
-        ETHBalance: '',
+        MoneyForOptions: [],
         //策略候选项数组
         tacticsOptions: [],
         //机器人obj
@@ -270,12 +247,8 @@
           coin: [],
           //交易币对
           MoneyFor: [],
-          //USDT
-          USDT: '',
-          //BTC
-          BTC: '',
-          //ETH
-          ETH: '',
+          //本金列表
+          principalList: [],
           //策略
           tactics: '',
         },
@@ -316,27 +289,6 @@
               trigger: 'blur'
             },
           ],
-          USDT: [
-            {
-              required: true,
-              validator: this.$verifys.nullStr({item: 'USDT本金'}),
-              trigger: 'blur'
-            },
-          ],
-          BTC: [
-            {
-              required: true,
-              validator: this.$verifys.nullStr({item: 'BTC本金'}),
-              trigger: 'blur'
-            },
-          ],
-          ETH: [
-            {
-              required: true,
-              validator: this.$verifys.nullStr({item: 'ETH本金'}),
-              trigger: 'blur'
-            },
-          ],
           tactics: [
             {
               required: true,
@@ -347,7 +299,8 @@
         },
         //所有的选项数据
         allOptionsData: [],
-
+        //所有币种的余额
+        allCoinBalance: [],
       }
     },
     computed: {},
@@ -358,6 +311,7 @@
         this.initData();
         this.getPlatformList();
         this.getOptionData();
+        this.getStrategiesList();
       })
     },
     methods: {
@@ -397,10 +351,94 @@
       getOptionData(){
         this.$api.Robot.getOptionData().then(res => {
           if(res.data && res.data.status === 1000){
-            let data = res.data.data;
-            console.log(data);
+            this.allOptionsData = res.data.data;
           }
         });
+      },
+
+      //获得策略列表
+      getStrategiesList(){
+        this.$api.Robot.strategies().then(res => {
+          if(res.data && res.data.status === 1000){
+            this.tacticsOptions = res.data.data;
+          }
+        });
+      },
+
+      //改变'交易所'下拉框
+      changeBourse(val){
+        let arr = [];
+        for(let item in this.allOptionsData[val]){
+          let obj = {
+            label: item,
+            value: item,
+          };
+          arr.push(obj);
+        }
+        this.tradingRangeOptions = arr;
+        this.robotObj.tradingRange = '';
+        this.coinOptions = [];
+        this.MoneyForOptions = [];
+        this.robotObj.coin = [];
+        this.robotObj.principalList = [];
+        this.queryBalance();
+      },
+
+      //改变'交易区'下拉框
+      changeTradingRange(val){
+        let obj = this.allOptionsData[this.robotObj.bourse][val];
+        let arr = [];
+        this.AllMoneyForOptions = obj.symbol;
+        obj.coin.forEach(item => {
+          let obj = {
+            label: item,
+            value: item,
+          };
+          arr.push(obj);
+        });
+        this.coinOptions = arr;
+      },
+
+      //改变币种
+      changeCoin(val){
+        let arr = val;
+        let newArr = [];
+        this.MoneyForOptions = [];
+        this.robotObj.principalList = [];
+        this.AllMoneyForOptions.forEach(item => {
+          arr.forEach(itemIn => {
+            if(item.symbol.toLocaleUpperCase().includes(itemIn.toLocaleUpperCase())){
+              newArr.push(JSON.stringify(item))
+            }
+          })
+        });
+        arr.forEach(item => {
+          let obj = {
+            text: item,
+            value: '',
+            balance: this.getCoinBalance(item)
+          };
+          this.robotObj.principalList.push(obj)
+        });
+
+        new Set(newArr).forEach(item => {
+          this.MoneyForOptions.push(JSON.parse(item));
+        });
+      },
+
+      //过得所有币种查询余额
+      queryBalance(){
+        this.$api.Robot.queryBalance({organize: this.robotObj.bourse}).then(res => {
+          if(res.data && res.data.status === 1000){
+            this.allCoinBalance = res.data.data;
+          }
+        });
+      },
+
+      //根据币种获得余额
+      getCoinBalance(coin){
+        let obj = this.allCoinBalance.find(item => item.symbol.toLocaleUpperCase() === coin.toLocaleUpperCase());
+        return obj.balance
       },
 
       //点击'添加'按钮
@@ -453,12 +491,33 @@
 
       //提交新增
       submitAdd(formName){
+        console.log(this.robotObj.principalList);
         this.$refs[formName].validate((valid) => {
           if(!valid){
             return false;
           }
           else{
-
+            let params = {
+              name: this.robotObj.name,
+              organize: this.robotObj.bourse,
+              plan: this.robotObj.tactics,
+              bit_symbol_ids: this.robotObj.MoneyFor,
+              has_coin: this.robotObj.coin,
+            };
+            params.all_principal = [];
+            this.robotObj.principalList.forEach(item => {
+              let obj = {
+                [item.text]: parseFloat(item.value)
+              };
+              params.all_principal.push(obj);
+            });
+            this.$api.Robot.addRobot(params).then(res => {
+              console.log(res);
+              if(res.data && res.data.status === 1000){
+                let data = res.data.data;
+                console.log('ok');
+              }
+            });
           }
         })
       },
@@ -475,9 +534,36 @@
         })
       },
 
-      //点击添加详情
+      //点击'详情'按钮
       clickDetailsBtn(row){
         this.$router.push('/RobotDetails/123');
+      },
+
+      //切换开关
+      changSwitch(row, type){
+        let stateStr = row[type] === 1 ? '关闭' : '开启';
+        let attrStr = '';
+        let params = {};
+        if(type === 'profit_end'){
+          attrStr = '止盈出场';
+          params = {
+            id: row.id,
+            profit_end: row[type]
+          };
+        }
+        else{
+          attrStr = '停止补仓';
+          params = {
+            id: row.id,
+            stop_open_position: row[type]
+          };
+        }
+        this.$api.Robot.changSwitch(params).then(res => {
+          if(res.data && res.data.status === 1000){
+            this.$common.successHint(`机器人 ( ${row.name} ) ${attrStr}${stateStr}成功`);
+            this.initData()
+          }
+        });
       },
     },
     props: {},

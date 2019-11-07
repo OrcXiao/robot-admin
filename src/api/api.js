@@ -92,9 +92,21 @@ const api = {
     getOptionData(){
       return axios.get('api/robot-coins');
     },
+    //查询余额
+    queryBalance(params){
+      return axios.get('api/users/api/balance', params);
+    },
+    //策略列表
+    strategies(params){
+      return axios.get('api/robots/strategies', params);
+    },
     //添加机器人
     addRobot(params){
-      return axios.get('api/robot');
+      return axios.post('api/robot', params);
+    },
+    //切换开关
+    changSwitch(params){
+      return axios.patch('api/robot-config/' + params.id, params);
     },
   },
   //收益总览
