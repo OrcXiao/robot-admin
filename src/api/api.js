@@ -108,6 +108,44 @@ const api = {
     changSwitch(params){
       return axios.patch('api/robot-config/' + params.id, params);
     },
+    //删除机器人
+    removeRobot(params){
+      return axios.delete('api/robot/' + params.id, params);
+    },
+    //启动机器人
+    startRobot(params){
+      return axios.patch('api/robots/start/' + params.id, params);
+    },
+    //暂停机器人
+    stopRobot(params){
+      return axios.patch('api/robots/stop/' + params.id, params);
+    },
+    //机器人详情
+    robotDetails(params){
+      return axios.get('api/robot/' + params.id, params);
+    },
+    //修改机器人
+    editRobot(params){
+      return axios.get('api/robot/' + params.id, params);
+    },
+    //跑单列表
+    orderList(params){
+      return axios.get('api/orders', {params});
+    },
+    //持仓/收益详情
+    earningsDetails(params){
+      return axios.get('api/orders/record/' + params.id);
+    },
+    //获取跑单详情
+    getOrder(params){
+      return axios.get('api/orders/' + params.id, params);
+    },
+    //修改跑单
+    editOrder(params){
+      return axios.patch('api/order-config/' + params.id, params);
+    },
+  
+  
   },
   //收益总览
   EarningsOverview: {},

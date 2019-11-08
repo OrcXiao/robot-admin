@@ -61,13 +61,14 @@
         label="状态">
       </el-table-column>
       <el-table-column
-        width="420"
+        width="440"
         label="操作">
         <template slot-scope="scope">
           <el-button
             @click="clickEditBtn(scope.row)"
             icon="el-icon-edit"
-            type="success">修改
+            :loading="scope.row.loadingState"
+            type="success">{{scope.row.loadingState ? '加载' : '修改'}}
           </el-button>
           <el-button
             v-if="scope.row.status === 1"
@@ -89,6 +90,7 @@
           <el-button
             @click="clickDetailsBtn(scope.row)"
             icon="el-icon-tickets"
+
             type="warning">详情
           </el-button>
         </template>
@@ -301,6 +303,8 @@
         allOptionsData: [],
         //所有币种的余额
         allCoinBalance: [],
+        //当前操作机器人id
+        currencyRobotId: '',
       }
     },
     computed: {},
@@ -325,6 +329,9 @@
         this.$api.Robot.RobotList(params).then(res => {
           if(res.data && res.data.status === 1000){
             let data = res.data.data;
+            data.data.forEach(item => {
+              item.loadingState = false
+            });
             this.tableData = data.data;
             this.tableDataLength = data.total;
           }
@@ -397,6 +404,9 @@
           arr.push(obj);
         });
         this.coinOptions = arr;
+        this.robotObj.coin = [];
+        this.MoneyForOptions = [];
+        this.robotObj.MoneyFor = [];
       },
 
       //改变币种
@@ -412,6 +422,9 @@
             }
           })
         });
+        new Set(newArr).forEach(item => {
+          this.MoneyForOptions.push(JSON.parse(item));
+        });
         arr.forEach(item => {
           let obj = {
             text: item,
@@ -420,15 +433,11 @@
           };
           this.robotObj.principalList.push(obj)
         });
-
-        new Set(newArr).forEach(item => {
-          this.MoneyForOptions.push(JSON.parse(item));
-        });
       },
 
       //过得所有币种查询余额
-      queryBalance(){
-        this.$api.Robot.queryBalance({organize: this.robotObj.bourse}).then(res => {
+      async queryBalance(){
+        await this.$api.Robot.queryBalance({organize: this.robotObj.bourse}).then(res => {
           if(res.data && res.data.status === 1000){
             this.allCoinBalance = res.data.data;
           }
@@ -444,82 +453,89 @@
       //点击'添加'按钮
       clickAddBtn(){
         this.currentHandleType = 'add';
+        this.robotObj = {
+          name: '',
+          bourse: '',
+          tradingRange: '',
+          coin: [],
+          MoneyFor: [],
+          principalList: [],
+          tactics: '',
+        };
+        this.tradingRangeOptions = [];
+        this.coinOptions = [];
+        this.AllMoneyForOptions = [];
+        this.MoneyForOptions = [];
         this.isShowAddOrEditDialog = true;
       },
 
-      //点击'编辑'按钮
-      clickEditBtn(){
-        this.currentHandleType = 'edit';
-        this.isShowAddOrEditDialog = true;
-      },
+      //点击'修改'按钮
+      clickEditBtn(row){
+        let that = this;
+        row.loadingState = true;
+        this.$api.Robot.robotDetails({id: row.id}).then(async res => {
+          if(res.data && res.data.status === 1000){
+            let data = res.data.data;
+            this.currencyRobotId = data.id;
+            this.robotObj.name = data.name;
+            this.robotObj.bourse = data.organize;
+            await this.queryBalance(row.organize);
+            this.robotObj.tradingRange = data.area;
 
-      //点击'暂停'按钮
-      clickPauseBtn(row){
-        this.$confirm(`确定暂停机器人 ?`, '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-
-        }).catch(() => {
-        })
-      },
-
-      //点击'启动'按钮
-      clickStartBtn(row){
-        this.$confirm(`确定启动机器人 ?`, '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-
-        }).catch(() => {
-        })
-      },
-
-      //点击'暂停'按钮
-      clickRemoveBtn(row){
-        this.$confirm(`确定删除机器人 ?`, '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'error'
-        }).then(() => {
-
-        }).catch(() => {
-        })
-      },
-
-      //提交新增
-      submitAdd(formName){
-        console.log(this.robotObj.principalList);
-        this.$refs[formName].validate((valid) => {
-          if(!valid){
-            return false;
-          }
-          else{
-            let params = {
-              name: this.robotObj.name,
-              organize: this.robotObj.bourse,
-              plan: this.robotObj.tactics,
-              bit_symbol_ids: this.robotObj.MoneyFor,
-              has_coin: this.robotObj.coin,
-            };
-            params.all_principal = [];
-            this.robotObj.principalList.forEach(item => {
+            let optionsArr = this.allOptionsData[data.organize];
+            let tradingRangeOptions = [];
+            for(let item in optionsArr){
               let obj = {
-                [item.text]: parseFloat(item.value)
+                label: item,
+                value: item,
               };
-              params.all_principal.push(obj);
+              tradingRangeOptions.push(obj);
+            }
+            this.tradingRangeOptions = tradingRangeOptions;
+            let coinOptionsArr = this.allOptionsData[data.organize][data.area].coin;
+            let coinOptions = [];
+            coinOptionsArr.forEach(item => {
+              let obj = {
+                label: item,
+                value: item,
+              };
+              coinOptions.push(obj);
             });
-            this.$api.Robot.addRobot(params).then(res => {
-              console.log(res);
-              if(res.data && res.data.status === 1000){
-                let data = res.data.data;
-                console.log('ok');
-              }
+            this.coinOptions = coinOptions;
+            let newArr = [];
+            this.AllMoneyForOptions = this.allOptionsData[data.organize][data.area].symbol;
+            this.AllMoneyForOptions.forEach(item => {
+              data.had_coin.forEach(itemIn => {
+                if(item.symbol.toLocaleUpperCase().includes(itemIn.toLocaleUpperCase())){
+                  newArr.push(JSON.stringify(item))
+                }
+              })
             });
+            this.MoneyForOptions = [];
+            new Set(newArr).forEach(item => {
+              this.MoneyForOptions.push(JSON.parse(item));
+            });
+            this.robotObj.MoneyFor = data.symbols;
+            this.robotObj.tactics = data.plan;
+            this.robotObj.coin = data.had_coin;
+            this.robotObj.principalList = [];
+            let allPrincipalObj = data.all_principal;
+            for(let item in allPrincipalObj){
+              let obj = {
+                text: item,
+                value: allPrincipalObj[item],
+                balance: that.getCoinBalance(item)
+              };
+              this.robotObj.principalList.push(obj);
+            }
+            this.currentHandleType = 'edit';
+            this.isShowAddOrEditDialog = true;
           }
-        })
+        }).finally(() => {
+          setTimeout(() => {
+            row.loadingState = false;
+          }, 200)
+        });
       },
 
       //提交修改
@@ -529,14 +545,115 @@
             return false;
           }
           else{
+            let params = {
+              name: this.robotObj.name,
+              organize: this.robotObj.bourse,
+              area: this.robotObj.tradingRange,
+              plan: this.robotObj.tactics,
+              bit_symbol_ids: this.robotObj.MoneyFor,
+              has_coin: this.robotObj.coin,
+            };
+            params.id = this.currencyRobotId;
+            params.all_principal = {};
+            this.robotObj.principalList.forEach(item => {
+              params.all_principal[item.text] = parseFloat(item.value)
+            });
+            this.$api.Robot.editRobot(params).then(res => {
+              if(res.data && res.data.status === 1000){
+                this.$common.successHint('机器人修改成功');
+                this.isShowAddOrEditDialog = false;
+                this.Mixin_filterCondition();
+              }
+            });
+          }
+        })
+      },
 
+      //点击'暂停'按钮
+      clickPauseBtn(row){
+        this.$confirm(`确定暂停机器人${row.name} ?`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.$api.Robot.stopRobot({id: row.id}).then(res => {
+            if(res.data && res.data.status === 1000){
+              this.$common.successHint(`机器人${row.name}暂停成功`);
+              this.Mixin_filterCondition();
+            }
+          });
+        }).catch(() => {
+        })
+      },
+
+      //点击'启动'按钮
+      clickStartBtn(row){
+        this.$confirm(`确定启动机器人${row.name} ?`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.$api.Robot.startRobot({id: row.id}).then(res => {
+            if(res.data && res.data.status === 1000){
+              this.$common.successHint(`机器人${row.name}启动成功`);
+              this.Mixin_filterCondition();
+            }
+          });
+        }).catch(() => {
+        })
+      },
+
+      //点击'暂停'按钮
+      clickRemoveBtn(row){
+        this.$confirm(`确定删除机器人${row.name} ?`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'error'
+        }).then(() => {
+          this.$api.Robot.removeRobot({id: row.id}).then(res => {
+            if(res.data && res.data.status === 1000){
+              this.$common.successHint('机器人删除成功');
+              this.Mixin_filterCondition();
+            }
+          });
+
+        }).catch(() => {
+        })
+      },
+
+      //提交新增
+      submitAdd(formName){
+        this.$refs[formName].validate((valid) => {
+          if(!valid){
+            return false;
+          }
+          else{
+            let params = {
+              name: this.robotObj.name,
+              organize: this.robotObj.bourse,
+              area: this.robotObj.tradingRange,
+              plan: this.robotObj.tactics,
+              bit_symbol_ids: this.robotObj.MoneyFor,
+              has_coin: this.robotObj.coin,
+            };
+            params.all_principal = {};
+            this.robotObj.principalList.forEach(item => {
+              params.all_principal[item.text] = parseFloat(item.value)
+            });
+            this.$api.Robot.addRobot(params).then(res => {
+              if(res.data && res.data.status === 1000){
+                this.$common.successHint('机器人添加成功');
+                this.isShowAddOrEditDialog = false;
+                this.Mixin_filterCondition();
+              }
+            });
           }
         })
       },
 
       //点击'详情'按钮
       clickDetailsBtn(row){
-        this.$router.push('/RobotDetails/123');
+        this.$router.push('/RobotDetails/' + row.id);
       },
 
       //切换开关

@@ -2,7 +2,11 @@
   <div class="bkFFFFFF p30 RobotDetails-wrap">
     <div class="pb30">
       <span class="pr20">类型 :</span>
-      <el-select class="pr20" style="width: 160px" v-model="type" placeholder="请选择类型">
+      <el-select
+        class="pr20"
+        style="width: 160px"
+        v-model="type"
+        placeholder="请选择类型">
         <el-option
           v-for="(item, index) in typeOptions"
           :key="index"
@@ -10,7 +14,7 @@
           :value="item.id">
         </el-option>
       </el-select>
-      <el-button>搜索</el-button>
+      <el-button @click="Mixin_filterCondition">搜索</el-button>
     </div>
     <el-table
       border
@@ -23,51 +27,51 @@
         align="center">
       </el-table-column>
       <el-table-column
-        prop="date"
+        prop="type_zh"
         label="类型">
       </el-table-column>
       <el-table-column
-        prop="name"
+        prop="plan_zh"
         label="策略">
       </el-table-column>
       <el-table-column
-        prop="name"
+        prop="symbol"
         label="交易对">
       </el-table-column>
       <el-table-column
-        prop="name"
+        prop="pocket_price"
         label="总持仓">
       </el-table-column>
       <el-table-column
-        prop="name"
+        prop="average_price_round"
         label="当前价格">
       </el-table-column>
       <el-table-column
-        prop="name"
+        prop="pocket_average_price"
         label="持仓均价">
       </el-table-column>
       <el-table-column
-        prop="name"
+        prop="next_buy_price"
         label="预计补仓价">
       </el-table-column>
       <el-table-column
-        prop="name"
+        prop="next_sell_price"
         label="预计平仓价">
       </el-table-column>
       <el-table-column
-        prop="name"
+        prop="now_make_up_position_pretty"
         label="补仓阶段">
       </el-table-column>
       <el-table-column
-        prop="name"
+        prop="finish_order_num"
         label="平仓次数">
       </el-table-column>
       <el-table-column
-        prop="name"
+        prop="status_zh"
         label="状态">
       </el-table-column>
       <el-table-column
-        prop="name"
+        prop="last_run_at_zh"
         label="最后运行">
       </el-table-column>
       <el-table-column
@@ -77,7 +81,9 @@
           <el-button
             @click="clickEditBtn(scope.row)"
             icon="el-icon-edit"
-            type="success">修改
+            :loading="scope.row.loadingState"
+            type="success">
+            {{scope.row.loadingState ? '加载' : '修改'}}
           </el-button>
           <el-button
             @click="clickPositionBtn(scope.row)"
@@ -99,20 +105,17 @@
     <el-pagination
       @size-change="Mixin_handleSizeChange"
       @current-change="Mixin_handleCurrentChange"
-      :current-page="4"
-      :page-sizes="[10, 20, 50]"
-      :page-size="10"
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="70">
+      :page-size="per_page"
+      layout="total, prev, pager, next, jumper"
+      :total="tableDataLength">
     </el-pagination>
 
     <!--收益弹框-->
     <el-dialog
       title="收益"
-      @close="Mixin_closeDialog('robotObj', 'isShowAddOrEditDialog')"
       :visible.sync="isShowEarningsDialog"
       :append-to-body=true
-      width="1000px">
+      width="1100px">
       <el-table
         border
         :data="earningsTableData"
@@ -165,21 +168,18 @@
       <el-pagination
         @size-change="Mixin_handleSizeChange"
         @current-change="Mixin_handleCurrentChange"
-        :current-page="4"
-        :page-sizes="[10, 20, 50]"
-        :page-size="10"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="70">
+        :page-size="per_page"
+        layout="total, prev, pager, next, jumper"
+        :total="earningsTableDataLength">
       </el-pagination>
     </el-dialog>
 
     <!--收益详情弹框-->
     <el-dialog
       title="收益详情"
-      @close="Mixin_closeDialog('robotObj', 'isShowEarningsDetailsDialog')"
       :visible.sync="isShowEarningsDetailsDialog"
       :append-to-body=true
-      width="1000px">
+      width="1100px">
       <el-table
         border
         :data="earningsDetailsTableData"
@@ -273,7 +273,7 @@
           </div>
         </el-form-item>
         <el-form-item label="停止补仓">
-          <el-switch v-model="robotObj.StopCover"></el-switch>
+          <el-switch :active-value="2" :inactive-value="1" v-model="robotObj.StopCover"></el-switch>
         </el-form-item>
         <el-form-item label="运行状态">
           <el-switch v-model="robotObj.RunningStatus"></el-switch>
@@ -308,7 +308,6 @@
 		    <el-button @click="isShowCloseAPositionDialog = false">取 消</el-button>
 		    <el-button type="primary" @click="submitCloseAPosit">保 存</el-button>
 		  </span>
-
     </el-dialog>
   </div>
 </template>
@@ -318,47 +317,42 @@
     name: "RobotDetails",
     data(){
       return {
+        //翻页序号
+        page: 1,
+        //表格每页大小
+        per_page: 10,
+
+        //机器人id
+        robotId: '',
         //类型
         type: '',
         //类型候选项
-        typeOptions: [],
-        //初始表格数据
-        tableData: [
+        typeOptions: [
           {
-            date: '2016-05-02',
-            name: '王小虎',
-            address: '上海市'
-          }, {
-            date: '2016-05-04',
-            name: '王小虎',
-            address: '上海市'
-          }, {
-            date: '2016-05-01',
-            name: '王小虎',
-            address: '上海市'
-          }, {
-            date: '2016-05-03',
-            name: '王小虎',
-            address: '上海市'
-          }
+            id: '',
+            name: '全部'
+          },
+          {
+            id: 1,
+            name: '看多'
+          },
+          {
+            id: 2,
+            name: '看空'
+          },
         ],
+        //初始表格数据
+        tableData: [],
+        //初始表格总数据数量
+        tableDataLength: 0,
         //显示收益弹框
         isShowEarningsDialog: false,
         //策略候选项数组
         tacticsOptions: [],
         //收益表格数据
-        earningsTableData: [
-          {
-            date: '2016-05-03',
-            name: '王小虎',
-            address: '上海市'
-          },
-          {
-            date: '2016-05-03',
-            name: '王小虎',
-            address: '上海市'
-          }
-        ],
+        earningsTableData: [],
+        //收益表格总数据数量
+        earningsTableDataLength: 0,
         //显示收益详情弹框
         isShowEarningsDetailsDialog: false,
         //收益详情表格数据
@@ -376,6 +370,8 @@
         ],
         //显示修改机器人弹框
         isShowEditRobotDialog: false,
+        //当前机器人id
+        currencyRobotId: '',
         //修改机器人obj
         robotObj: {
           tactics: '',
@@ -419,18 +415,57 @@
     },
     mounted(){
       this.$nextTick(() => {
+        this.robotId = this.$route.params.id;
         this.initData();
+        this.getStrategiesList();
       })
     },
     methods: {
       //获取初始表格数据
       initData(){
-
+        let params = {
+          robot_id: this.robotId,
+          type: this.type,
+        };
+        this.$api.Robot.orderList(params).then(res => {
+          if(res.data && res.data.status === 1000){
+            let data = res.data.data;
+            data.data.forEach(item => {
+              item.loadingState = false
+            });
+            this.tableData = data.data;
+            this.tableDataLength = data.total
+          }
+        });
       },
 
-      //点击'编辑'按钮
-      clickEditBtn(){
-        this.isShowEditRobotDialog = true;
+      //获得策略列表
+      getStrategiesList(){
+        this.$api.Robot.strategies().then(res => {
+          if(res.data && res.data.status === 1000){
+            this.tacticsOptions = res.data.data;
+          }
+        });
+      },
+
+      //点击'修改'按钮
+      clickEditBtn(row){
+        row.loadingState = true;
+        this.$api.Robot.getOrder({id: row.id}).then(res => {
+          if(res.data && res.data.status === 1000){
+            let data = res.data.data;
+            this.currencyRobotId = row.id;
+            this.robotObj.tactics = data.plan;
+            this.robotObj.GridClearance = !!data.grid_sell;
+            this.robotObj.percentage = data.grid_sell;
+            this.robotObj.StopCover = data.stop_open_position;
+            this.robotObj.RunningStatus = [1, 2, 4].includes(data.status);
+            this.isShowEditRobotDialog = true;
+            row.loadingState = false;
+          }
+        });
+
+
       },
 
       //点击'持仓'按钮
@@ -439,8 +474,19 @@
       },
 
       //点击'收益'按钮
-      clickEarningsBtn(){
-        this.isShowEarningsDialog = true;
+      clickEarningsBtn(row){
+        this.$api.Robot.earningsDetails({id: row.id}).then(res => {
+          if(res.data && res.data.status === 1000){
+            console.log(res.data);
+            let data = res.data.data;
+
+            this.earningsTableData = data;
+            this.earningsTableDataLength = data;
+            this.isShowEarningsDialog = true;
+
+          }
+        });
+
       },
 
       //点击'闪电平仓'按钮
@@ -460,6 +506,22 @@
             return false;
           }
           else{
+            let params = {
+              stop_open_position: this.robotObj.StopCover + '',
+              grid_sell_switch: (this.robotObj.GridClearance ? 1 : 0) + '',
+              status: (this.robotObj.StopCover ? 2 : 1) + '',
+              plan: this.robotObj.tactics + '',
+            };
+            if(this.robotObj.GridClearance){
+              params.grid_sell_ratio = this.robotObj.percentage
+            }
+            params.id = this.currencyRobotId;
+            this.$api.Robot.editOrder(params).then(res => {
+              if(res.data && res.data.status === 1000){
+                this.isShowEditRobotDialog = false;
+                this.$common.successHint('修改机器人成功');
+              }
+            });
 
           }
         })
