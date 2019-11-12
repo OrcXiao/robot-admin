@@ -75,25 +75,29 @@
         label="最后运行">
       </el-table-column>
       <el-table-column
-        width="440"
+        width="450"
         label="操作">
         <template slot-scope="scope">
           <el-button
             @click="clickEditBtn(scope.row)"
             icon="el-icon-edit"
-            :loading="scope.row.loadingState"
+            :loading="scope.row.loadingEditState"
             type="success">
-            {{scope.row.loadingState ? '加载' : '修改'}}
+            {{scope.row.loadingEditState ? '加载' : '修改'}}
           </el-button>
           <el-button
             @click="clickPositionBtn(scope.row)"
             icon="el-icon-shopping-cart-2"
-            type="info">持仓
+            :loading="scope.row.loadingPositionState"
+            type="info">
+            {{scope.row.loadingEditState ? '加载' : '持仓'}}
           </el-button>
           <el-button
             @click="clickEarningsBtn(scope.row)"
             icon="el-icon-s-goods"
-            type="warning">收益
+            :loading="scope.row.loadingEarningsState"
+            type="warning">
+            {{scope.row.loadingEditState ? '加载' : '收益'}}
           </el-button>
           <el-button
             @click="clickCloseAPositionBtn(scope.row)"
@@ -127,32 +131,35 @@
           align="center">
         </el-table-column>
         <el-table-column
-          prop="name"
+          prop="symbol"
           label="交易对">
         </el-table-column>
         <el-table-column
-          prop="name"
+          prop="quote_currency_amount_round"
           label="盈利额">
         </el-table-column>
         <el-table-column
-          prop="name"
+          prop="quote_currency_profit_amount_round"
           label="盈利额(计价币)">
         </el-table-column>
         <el-table-column
-          prop="name"
+          prop="total_ratio"
           label="总盈利(%)">
         </el-table-column>
         <el-table-column
-          prop="name"
+          prop="last_run_at"
           label="最后运行时间">
         </el-table-column>
         <el-table-column
-          prop="name"
+          prop="created_at"
           label="订单开始时间">
         </el-table-column>
         <el-table-column
-          prop="name"
+          prop="status"
           label="状态">
+          <template slot-scope="scope">
+            {{scope.row.status === 5 ? '已丢弃' : '已完成'}}
+          </template>
         </el-table-column>
         <el-table-column
           label="操作">
@@ -296,11 +303,11 @@
         label-position="right"
         label-width="120px">
         <el-form-item label="当前持有仓位 :">
-          <div>10BTC</div>
+          <div>{{CloseAPositObj.shipping}}</div>
         </el-form-item>
         <el-form-item label="当前盈利率 :">
-          <el-tag type="success" effect="dark">+3%</el-tag>
-          <el-tag type="danger" effect="dark">-2%</el-tag>
+          <el-tag type="success" effect="dark">{{CloseAPositObj.earningsRate}}%</el-tag>
+          <el-tag type="danger" effect="dark">{{CloseAPositObj.earningsRate}}%</el-tag>
         </el-form-item>
         <div class="tc">请你确认是否全部平仓 ?</div>
       </el-form>
@@ -356,18 +363,7 @@
         //显示收益详情弹框
         isShowEarningsDetailsDialog: false,
         //收益详情表格数据
-        earningsDetailsTableData: [
-          {
-            date: '2016-05-03',
-            name: '王小虎',
-            address: '上海市'
-          },
-          {
-            date: '2016-05-03',
-            name: '王小虎',
-            address: '上海市'
-          }
-        ],
+        earningsDetailsTableData: [],
         //显示修改机器人弹框
         isShowEditRobotDialog: false,
         //当前机器人id
@@ -431,10 +427,12 @@
           if(res.data && res.data.status === 1000){
             let data = res.data.data;
             data.data.forEach(item => {
-              item.loadingState = false
+              item.loadingEditState = false;
+              item.loadingPositionState = false;
+              item.loadingEarningsState = false;
             });
             this.tableData = data.data;
-            this.tableDataLength = data.total
+            this.tableDataLength = data.total;
           }
         });
       },
@@ -450,43 +448,44 @@
 
       //点击'修改'按钮
       clickEditBtn(row){
-        row.loadingState = true;
+        row.loadingEditState = true;
         this.$api.Robot.getOrder({id: row.id}).then(res => {
           if(res.data && res.data.status === 1000){
             let data = res.data.data;
             this.currencyRobotId = row.id;
-            this.robotObj.tactics = data.plan;
+            this.robotObj.tactics = parseFloat(data.plan);
             this.robotObj.GridClearance = !!data.grid_sell;
             this.robotObj.percentage = data.grid_sell;
             this.robotObj.StopCover = data.stop_open_position;
             this.robotObj.RunningStatus = [1, 2, 4].includes(data.status);
             this.isShowEditRobotDialog = true;
-            row.loadingState = false;
+            row.loadingEditState = false;
           }
         });
-
-
       },
 
       //点击'持仓'按钮
-      clickPositionBtn(){
-        this.isShowEarningsDetailsDialog = true;
+      clickPositionBtn(row){
+        row.loadingPositionState = true;
+        this.$api.Robot.earningsDetails({id: row.id}).then(res => {
+          if(res.data && res.data.status === 1000){
+            this.earningsDetailsTableData = res.data.data;
+            this.isShowEarningsDetailsDialog = true;
+            row.loadingPositionState = false;
+          }
+        });
       },
 
       //点击'收益'按钮
       clickEarningsBtn(row){
-        this.$api.Robot.earningsDetails({id: row.id}).then(res => {
+        this.$api.Robot.getEarnings({id: row.id}).then(res => {
           if(res.data && res.data.status === 1000){
-            console.log(res.data);
             let data = res.data.data;
-
-            this.earningsTableData = data;
-            this.earningsTableDataLength = data;
+            this.earningsTableData = data.data;
+            this.earningsTableDataLength = data.total;
             this.isShowEarningsDialog = true;
-
           }
         });
-
       },
 
       //点击'闪电平仓'按钮
@@ -520,9 +519,9 @@
               if(res.data && res.data.status === 1000){
                 this.isShowEditRobotDialog = false;
                 this.$common.successHint('修改机器人成功');
+                this.initData();
               }
             });
-
           }
         })
       },

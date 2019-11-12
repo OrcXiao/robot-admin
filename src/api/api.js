@@ -126,7 +126,7 @@ const api = {
     },
     //修改机器人
     editRobot(params){
-      return axios.get('api/robot/' + params.id, params);
+      return axios.patch('api/robot/' + params.id, params);
     },
     //跑单列表
     orderList(params){
@@ -135,6 +135,10 @@ const api = {
     //持仓/收益详情
     earningsDetails(params){
       return axios.get('api/orders/record/' + params.id);
+    },
+    //持仓/收益详情
+    getEarnings(params){
+      return axios.get('api/orders/income/' + params.id);
     },
     //获取跑单详情
     getOrder(params){
