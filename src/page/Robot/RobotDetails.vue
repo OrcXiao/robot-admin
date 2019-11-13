@@ -152,6 +152,7 @@
         </el-table-column>
         <el-table-column
           prop="created_at"
+          width="170"
           label="订单开始时间">
         </el-table-column>
         <el-table-column
@@ -183,10 +184,10 @@
 
     <!--收益详情弹框-->
     <el-dialog
-      title="收益详情"
+      title="持仓"
       :visible.sync="isShowEarningsDetailsDialog"
       :append-to-body=true
-      width="1100px">
+      width="1200px">
       <el-table
         border
         :data="earningsDetailsTableData"
@@ -198,47 +199,58 @@
           align="center">
         </el-table-column>
         <el-table-column
-          prop="name"
+          prop="now_make_up_position_pretty"
           label="补仓位置">
         </el-table-column>
         <el-table-column
-          prop="name"
+          prop="pocket_average_price_round"
           label="当时价格">
         </el-table-column>
         <el-table-column
-          prop="name"
+          prop="quote_currency"
           label="计价币">
         </el-table-column>
         <el-table-column
-          prop="name"
+          prop="base_currency"
           label="交易币">
         </el-table-column>
         <el-table-column
-          prop="name"
+          prop="profit_amount_round"
+          width="150"
           label="盈利额">
         </el-table-column>
         <el-table-column
-          prop="name"
+          prop="quote_currency_profit_amount_round"
+          width="150"
           label="盈利额(计价币)">
         </el-table-column>
         <el-table-column
-          prop="name"
+          prop="profit_amount_ratio"
           label="盈利(%)">
         </el-table-column>
         <el-table-column
-          prop="name"
+          prop="type_zh"
           label="类型">
         </el-table-column>
         <el-table-column
-          prop="name"
+          prop="action_type"
           label="操作记录">
         </el-table-column>
         <el-table-column
-          prop="name"
           label="标签">
+          <template slot-scope="scope">
+            <el-tag v-if="(scope.row.operate & 8) === 8" type="danger">防瀑布</el-tag>
+            <el-tag v-if="(scope.row.operate & 32) === 32" type="warning">追踪止盈</el-tag>
+            <el-tag v-if="(scope.row.operate & 64) === 64" type="success">网格</el-tag>
+            <el-tag v-if="(scope.row.operate & 128) === 128">横盘</el-tag>
+            <el-tag v-if="(scope.row.operate & 256) === 256" type="info">优先卖出</el-tag>
+            <el-tag v-if="(scope.row.operate & 512) === 512" type="info">强制平仓</el-tag>
+            <el-tag v-if="(scope.row.operate & 1024) === 1024" type="info">网格清仓</el-tag>
+          </template>
         </el-table-column>
         <el-table-column
-          prop="name"
+          width="160"
+          prop="complete_at"
           label="完成时间">
         </el-table-column>
       </el-table>
@@ -295,19 +307,29 @@
     <!--闪电平仓-->
     <el-dialog
       title="闪电平仓"
-      @close="Mixin_closeDialog('robotObj', 'isShowCloseAPositionDialog')"
+      @close="Mixin_closeDialog('CloseAPositObj', 'isShowCloseAPositionDialog')"
       :visible.sync="isShowCloseAPositionDialog"
       :append-to-body=true
       width="400px">
       <el-form
+        ref="CloseAPositObj"
         label-position="right"
         label-width="120px">
         <el-form-item label="当前持有仓位 :">
           <div>{{CloseAPositObj.shipping}}</div>
         </el-form-item>
         <el-form-item label="当前盈利率 :">
-          <el-tag type="success" effect="dark">{{CloseAPositObj.earningsRate}}%</el-tag>
-          <el-tag type="danger" effect="dark">{{CloseAPositObj.earningsRate}}%</el-tag>
+          <el-tag
+            v-if="CloseAPositObj.earningsRate < 0"
+            type="success"
+            effect="dark">{{CloseAPositObj.earningsRate}}%
+          </el-tag>
+          <span v-if="CloseAPositObj.earningsRate === 0">{{CloseAPositObj.earningsRate}}</span>
+          <el-tag
+            v-if="CloseAPositObj.earningsRate > 0"
+            type="danger"
+            effect="dark">{{CloseAPositObj.earningsRate}}%
+          </el-tag>
         </el-form-item>
         <div class="tc">请你确认是否全部平仓 ?</div>
       </el-form>
@@ -328,7 +350,6 @@
         page: 1,
         //表格每页大小
         per_page: 10,
-
         //机器人id
         robotId: '',
         //类型
@@ -467,7 +488,7 @@
       //点击'持仓'按钮
       clickPositionBtn(row){
         row.loadingPositionState = true;
-        this.$api.Robot.earningsDetails({id: row.id}).then(res => {
+        this.$api.Robot.earningsDetails({id: row.order_id}).then(res => {
           if(res.data && res.data.status === 1000){
             this.earningsDetailsTableData = res.data.data;
             this.isShowEarningsDetailsDialog = true;
@@ -478,24 +499,35 @@
 
       //点击'收益'按钮
       clickEarningsBtn(row){
+        row.loadingEarningsState = true;
         this.$api.Robot.getEarnings({id: row.id}).then(res => {
           if(res.data && res.data.status === 1000){
             let data = res.data.data;
             this.earningsTableData = data.data;
             this.earningsTableDataLength = data.total;
             this.isShowEarningsDialog = true;
+            row.loadingEarningsState = false;
           }
         });
       },
 
       //点击'闪电平仓'按钮
-      clickCloseAPositionBtn(){
+      clickCloseAPositionBtn(row){
+        this.CloseAPositObj.id = row.id;
+        this.CloseAPositObj.shipping = parseFloat(row.pocket_price);
+        this.CloseAPositObj.earningsRate = parseFloat(row.total_ratio);
         this.isShowCloseAPositionDialog = true;
       },
 
-      //点击'收益表格里的详情'按钮
-      clickDetailsBtn(){
-        this.isShowEarningsDetailsDialog = true;
+      //点击收益表格里的'详情'按钮
+      clickDetailsBtn(row){
+        this.$api.Robot.earningsDetails({id: row.id}).then(res => {
+          if(res.data && res.data.status === 1000){
+            let data = res.data.data;
+            this.earningsDetailsTableData = data.data;
+            this.isShowEarningsDetailsDialog = true;
+          }
+        });
       },
 
       //提交修改
@@ -528,9 +560,13 @@
 
       //提交闪电平仓
       submitCloseAPosit(){
-
+        this.$api.Robot.orderPosition({id: this.CloseAPositObj.id}).then(res => {
+          if(res.data && res.data.status === 1000){
+            this.isShowCloseAPositionDialog = false;
+            this.$common.successHint('平仓成功');
+          }
+        });
       },
-
 
     },
     props: {},

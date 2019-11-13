@@ -174,7 +174,6 @@
     },
     mounted(){
       this.$nextTick(() => {
-        this.chartConf();
         this.getHeadData();
         this.getEarningsData();
         this.getTableData();

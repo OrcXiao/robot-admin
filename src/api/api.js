@@ -148,11 +148,23 @@ const api = {
     editOrder(params){
       return axios.patch('api/order-config/' + params.id, params);
     },
-  
-  
+    //强制平仓
+    orderPosition(params){
+      return axios.delete('api/order-position/' + params.id, params);
+    },
   },
   //收益总览
-  EarningsOverview: {},
+  EarningsOverview: {
+    //机器人列表
+    robotList(){
+      return axios.get('api/report-robots');
+    },
+    //收益总览
+    getEarnings(params){
+      return axios.get('api/report-profit', {params});
+    },
+    
+  },
   
 };
 

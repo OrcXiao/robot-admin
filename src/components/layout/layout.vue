@@ -22,16 +22,18 @@
   export default {
     name: "layout",
     data(){
-      return {}
+      return {
+        globalLoading: '',
+      }
     },
     computed: {},
     created(){
     },
     mounted(){
       this.$nextTick(() => {
-
       })
     },
+    watch: {},
     methods: {},
     props: {},
     mixins: [],
@@ -66,18 +68,15 @@
   * transition --- 页面切换的过度效果..
   */
   .pageswitching-enter-active,
-  .pageswitching-leave-active{
-    transition: all .3s;
+  .pageswitching-leave-active,
+  .pageswitching-move{
+    transition: all 0.3s;
   }
 
   .pageswitching-enter,
   .pageswitching-leave-active{
     opacity: 0;
     transform: translateX(20px);
-  }
-
-  .pageswitching-move{
-    transition: all .3s;
   }
 
   .pageswitching-leave-active{

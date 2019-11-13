@@ -82,7 +82,8 @@
   .el-menu-item i{
     color: #B2CCFB;
   }
-  .el-menu-item,.is-active i{
+
+  .el-menu-item, .is-active i{
     color: #FFFFFF;
   }
 
