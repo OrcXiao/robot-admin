@@ -69,6 +69,15 @@
       <el-table-column
         prop="status_zh"
         label="状态">
+        <template slot-scope="scope">
+          <el-tag
+            class="cuso"
+            @click="clickAbnormalBtn(scope.row)"
+            v-if="scope.row.status_zh === '异常'"
+            type="danger">异常
+          </el-tag>
+          <span v-else>{{scope.row.status_zh}}</span>
+        </template>
       </el-table-column>
       <el-table-column
         prop="last_run_at_zh"
@@ -207,11 +216,11 @@
           label="当时价格">
         </el-table-column>
         <el-table-column
-          prop="quote_currency"
+          prop="quote_currency_amount_round"
           label="计价币">
         </el-table-column>
         <el-table-column
-          prop="base_currency"
+          prop="base_currency_amount_round"
           label="交易币">
         </el-table-column>
         <el-table-column
@@ -295,7 +304,7 @@
           <el-switch :active-value="2" :inactive-value="1" v-model="robotObj.StopCover"></el-switch>
         </el-form-item>
         <el-form-item label="运行状态">
-          <el-switch v-model="robotObj.RunningStatus"></el-switch>
+          <el-switch :disabled="noHandleState" v-model="robotObj.RunningStatus"></el-switch>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -336,6 +345,38 @@
       <span slot="footer" class="dialog-footer">
 		    <el-button @click="isShowCloseAPositionDialog = false">取 消</el-button>
 		    <el-button type="primary" @click="submitCloseAPosit">保 存</el-button>
+		  </span>
+    </el-dialog>
+
+    <!--异常信息表格-->
+    <el-dialog
+      title="异常信息"
+      @close="Mixin_closeDialog('CloseAPositObj', 'isShowAbnormalDialog')"
+      :visible.sync="isShowAbnormalDialog"
+      :append-to-body=true
+      width="400px">
+      <el-table
+        border
+        :data="earningsDetailsTableData"
+        style="width: 100%">
+        <el-table-column
+          label="序号"
+          type="index"
+          width="50"
+          align="center">
+        </el-table-column>
+        <el-table-column
+          prop="record"
+          label="名称">
+        </el-table-column>
+        <el-table-column
+          prop="status_zh"
+          label="状态">
+        </el-table-column>
+      </el-table>
+
+      <span slot="footer" class="dialog-footer">
+		    <el-button @click="isShowAbnormalDialog = false">取 消</el-button>
 		  </span>
     </el-dialog>
   </div>
@@ -389,6 +430,8 @@
         isShowEditRobotDialog: false,
         //当前机器人id
         currencyRobotId: '',
+        //运行状态是否禁用
+        noHandleState: false,
         //修改机器人obj
         robotObj: {
           tactics: '',
@@ -423,7 +466,13 @@
           shipping: '',
           //盈利率
           earningsRate: '',
-        }
+        },
+        //异常信息表格数据
+        abnormalTable: [],
+        //异常信息表格总数
+        abnormalTableLength: 0,
+        //显示异常信息表格
+        isShowAbnormalDialog: false,
 
       }
     },
@@ -470,6 +519,7 @@
       //点击'修改'按钮
       clickEditBtn(row){
         row.loadingEditState = true;
+        this.noHandleState = false;
         this.$api.Robot.getOrder({id: row.id}).then(res => {
           if(res.data && res.data.status === 1000){
             let data = res.data.data;
@@ -477,8 +527,17 @@
             this.robotObj.tactics = parseFloat(data.plan);
             this.robotObj.GridClearance = !!data.grid_sell;
             this.robotObj.percentage = data.grid_sell;
-            this.robotObj.StopCover = data.stop_open_position;
-            this.robotObj.RunningStatus = [1, 2, 4].includes(data.status);
+            this.robotObj.StopCover = parseFloat(data.stop_open_position);
+            if(data.status === 1 || data.status === 4){
+              this.robotObj.RunningStatus = true;
+            }
+            else if(data.status === 2){
+              this.robotObj.RunningStatus = false;
+              this.noHandleState = true;
+            }
+            else if(data.status === 3){
+              this.robotObj.RunningStatus = false;
+            }
             this.isShowEditRobotDialog = true;
             row.loadingEditState = false;
           }
@@ -537,10 +596,11 @@
             return false;
           }
           else{
+            console.log(this.robotObj.StopCover);
             let params = {
               stop_open_position: this.robotObj.StopCover + '',
               grid_sell_switch: (this.robotObj.GridClearance ? 1 : 0) + '',
-              status: (this.robotObj.StopCover ? 2 : 1) + '',
+              status: (this.robotObj.RunningStatus ? 1 : 0) + '',
               plan: this.robotObj.tactics + '',
             };
             if(this.robotObj.GridClearance){
@@ -564,6 +624,16 @@
           if(res.data && res.data.status === 1000){
             this.isShowCloseAPositionDialog = false;
             this.$common.successHint('平仓成功');
+          }
+        });
+      },
+
+      //点击异常
+      clickAbnormalBtn(row){
+        this.$api.Robot.getAbnormalInfo({order_id: row.order_id}).then(res => {
+          if(res.data && res.data.status === 1000){
+            let data = res.data.data;
+
           }
         });
       },

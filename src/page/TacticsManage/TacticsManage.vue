@@ -620,6 +620,7 @@
         this.$api.TacticsManage.tacticsDetails({id: row.id}).then(res => {
           if(res.data && res.data.status === 1000){
             let data = res.data.data;
+            console.log(data);
             this.ZhiYingBiLiArr = data.stop_profit_ratio.split(',');
             this.BuCangBiLiArr = data.make_up_ratio.split(',');
             this.BuCangShuLieArr = data.make_up_queue.split(',');
@@ -629,8 +630,8 @@
             this.tacticsObj.AllowTheCallback = data.tracking_profit_ratio;
             this.tacticsObj.SidewaysTime = data.tracking_profit_duration;
             this.tacticsObj.ToPreventFalls = data.tracking_profit_switch;
-            this.tacticsObj.AllowTheCallback2 = data.tracking_profit_ratio;
-            this.tacticsObj.SidewaysTime2 = data.tracking_profit_duration;
+            this.tacticsObj.AllowTheCallback2 = data.flood_ratio;
+            this.tacticsObj.SidewaysTime2 = data.flood_duration;
             this.tacticsObj.Grid = data.grid_switch;
             this.tacticsObj.OpenCondition = data.grid_step;
             this.tacticsObj.CloseCondition = data.grid_down_step;

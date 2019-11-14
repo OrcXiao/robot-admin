@@ -152,6 +152,10 @@ const api = {
     orderPosition(params){
       return axios.delete('api/order-position/' + params.id, params);
     },
+    //获取异常信息
+    getAbnormalInfo(params){
+      return axios.delete('api/orders/errors', {params});
+    },
   },
   //收益总览
   EarningsOverview: {
