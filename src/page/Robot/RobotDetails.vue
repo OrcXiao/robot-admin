@@ -137,7 +137,7 @@
       title="收益"
       :visible.sync="isShowEarningsDialog"
       :append-to-body=true
-      width="1100px">
+      width="1300px">
       <el-table
         border
         :data="earningsTableData"
@@ -204,7 +204,7 @@
       :title="dialogTitleText"
       :visible.sync="isShowEarningsDetailsDialog"
       :append-to-body=true
-      width="1200px">
+      width="1300px">
       <el-table
         border
         :data="earningsDetailsTableData"
@@ -250,19 +250,23 @@
           label="类型">
         </el-table-column>
         <el-table-column
-          prop="action_type"
           label="操作记录">
+          <template slot-scope="scope">
+            <el-tag v-if="scope.row.action_type === 1" type="success">{{scope.row.action_type_zh}}</el-tag>
+            <el-tag v-if="scope.row.action_type === 2" type="danger">{{scope.row.action_type_zh}}</el-tag>
+          </template>
         </el-table-column>
         <el-table-column
+          width="100"
           label="标签">
           <template slot-scope="scope">
-            <el-tag v-if="(scope.row.operate & 8) === 8" type="danger">防瀑布</el-tag>
-            <el-tag v-if="(scope.row.operate & 32) === 32" type="warning">追踪止盈</el-tag>
-            <el-tag v-if="(scope.row.operate & 64) === 64" type="success">网格</el-tag>
-            <el-tag v-if="(scope.row.operate & 128) === 128">横盘</el-tag>
-            <el-tag v-if="(scope.row.operate & 256) === 256" type="info">优先卖出</el-tag>
-            <el-tag v-if="(scope.row.operate & 512) === 512" type="info">强制平仓</el-tag>
-            <el-tag v-if="(scope.row.operate & 1024) === 1024" type="info">网格清仓</el-tag>
+            <el-tag class="mb5" v-if="(scope.row.operate & 8) === 8" type="danger">防瀑布</el-tag>
+            <el-tag class="mb5" v-if="(scope.row.operate & 32) === 32" type="warning">追踪止盈</el-tag>
+            <el-tag class="mb5" v-if="(scope.row.operate & 64) === 64" type="success">网格</el-tag>
+            <el-tag class="mb5" v-if="(scope.row.operate & 128) === 128">横盘</el-tag>
+            <el-tag class="mb5" v-if="(scope.row.operate & 256) === 256" type="info">优先卖出</el-tag>
+            <el-tag class="mb5" v-if="(scope.row.operate & 512) === 512" type="info">强制平仓</el-tag>
+            <el-tag class="mb5" v-if="(scope.row.operate & 1024) === 1024" type="info">网格清仓</el-tag>
           </template>
         </el-table-column>
         <el-table-column
@@ -617,8 +621,7 @@
         this.dialogTitleText = '收益详情';
         this.$api.Robot.earningsDetails({id: row.id}).then(res => {
           if(res.data && res.data.status === 1000){
-            let data = res.data.data;
-            this.earningsDetailsTableData = data.data;
+            this.earningsDetailsTableData = res.data.data;
             this.isShowEarningsDetailsDialog = true;
           }
         });

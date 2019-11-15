@@ -143,6 +143,10 @@
         this.$api.EarningsOverview.robotList().then(res => {
           if(res.data && res.data.status === 1000){
             this.robotOptions = res.data.data;
+            this.robotOptions.unshift({
+              name: '全部',
+              id: ''
+            })
           }
         });
       },
