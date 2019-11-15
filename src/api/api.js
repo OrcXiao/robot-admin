@@ -154,7 +154,11 @@ const api = {
     },
     //获取异常信息
     getAbnormalInfo(params){
-      return axios.delete('api/orders/errors', {params});
+      return axios.get('api/orders/errors', {params});
+    },
+    //处理异常信息
+    disposeAbnormalInfo(params){
+      return axios.patch('api/orders/errors/' + params.id);
     },
   },
   //收益总览

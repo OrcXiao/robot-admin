@@ -29,6 +29,10 @@
       <el-table-column
         prop="type_zh"
         label="类型">
+        <template slot-scope="scope">
+          <el-tag effect="dark" v-if="scope.row.type === 1" type="success"> 看多</el-tag>
+          <el-tag effect="dark" v-else type="danger"> 看空</el-tag>
+        </template>
       </el-table-column>
       <el-table-column
         prop="plan_zh"
@@ -84,10 +88,11 @@
         label="最后运行">
       </el-table-column>
       <el-table-column
-        width="450"
+        width="220"
         label="操作">
         <template slot-scope="scope">
           <el-button
+            size="mini"
             @click="clickEditBtn(scope.row)"
             icon="el-icon-edit"
             :loading="scope.row.loadingEditState"
@@ -95,13 +100,17 @@
             {{scope.row.loadingEditState ? '加载' : '修改'}}
           </el-button>
           <el-button
+            size="mini"
             @click="clickPositionBtn(scope.row)"
             icon="el-icon-shopping-cart-2"
             :loading="scope.row.loadingPositionState"
             type="info">
             {{scope.row.loadingEditState ? '加载' : '持仓'}}
           </el-button>
+          <br>
+          <br>
           <el-button
+            size="mini"
             @click="clickEarningsBtn(scope.row)"
             icon="el-icon-s-goods"
             :loading="scope.row.loadingEarningsState"
@@ -109,6 +118,7 @@
             {{scope.row.loadingEditState ? '加载' : '收益'}}
           </el-button>
           <el-button
+            size="mini"
             @click="clickCloseAPositionBtn(scope.row)"
             icon="el-icon-data-line">闪电平仓
           </el-button>
@@ -116,7 +126,6 @@
       </el-table-column>
     </el-table>
     <el-pagination
-      @size-change="Mixin_handleSizeChange"
       @current-change="Mixin_handleCurrentChange"
       :page-size="per_page"
       layout="total, prev, pager, next, jumper"
@@ -183,17 +192,16 @@
         </el-table-column>
       </el-table>
       <el-pagination
-        @size-change="Mixin_handleSizeChange"
+        :current-page="earningsPage"
         @current-change="Mixin_handleCurrentChange"
-        :page-size="per_page"
         layout="total, prev, pager, next, jumper"
         :total="earningsTableDataLength">
       </el-pagination>
     </el-dialog>
 
-    <!--收益详情弹框-->
+    <!--持仓 / 收益详情弹框-->
     <el-dialog
-      title="持仓"
+      :title="dialogTitleText"
       :visible.sync="isShowEarningsDetailsDialog"
       :append-to-body=true
       width="1200px">
@@ -351,13 +359,12 @@
     <!--异常信息表格-->
     <el-dialog
       title="异常信息"
-      @close="Mixin_closeDialog('CloseAPositObj', 'isShowAbnormalDialog')"
       :visible.sync="isShowAbnormalDialog"
       :append-to-body=true
       width="400px">
       <el-table
         border
-        :data="earningsDetailsTableData"
+        :data="abnormalTableData"
         style="width: 100%">
         <el-table-column
           label="序号"
@@ -370,14 +377,25 @@
           label="名称">
         </el-table-column>
         <el-table-column
-          prop="status_zh"
           label="状态">
+          <template slot-scope="scope">
+            <el-tag
+              @click="disposeAbnormalInfo(scope.row)"
+              class="cuso"
+              type="danger"
+              v-if="scope.row.status === 1">
+              {{scope.row.status_zh}}
+            </el-tag>
+            <span v-else>{{scope.row.status_zh}}</span>
+          </template>
         </el-table-column>
       </el-table>
-
-      <span slot="footer" class="dialog-footer">
-		    <el-button @click="isShowAbnormalDialog = false">取 消</el-button>
-		  </span>
+      <el-pagination
+        :current-page="abnormalPage"
+        @current-change="abnormalTableCurrentChange"
+        layout="total, prev, pager, next, jumper"
+        :total="abnormalTableDataLength">
+      </el-pagination>
     </el-dialog>
   </div>
 </template>
@@ -422,6 +440,8 @@
         earningsTableData: [],
         //收益表格总数据数量
         earningsTableDataLength: 0,
+        //收益分页
+        earningsPage: 1,
         //显示收益详情弹框
         isShowEarningsDetailsDialog: false,
         //收益详情表格数据
@@ -473,7 +493,16 @@
         abnormalTableLength: 0,
         //显示异常信息表格
         isShowAbnormalDialog: false,
-
+        //异常信息表格
+        abnormalTableData: [],
+        //异常信息表格总数据
+        abnormalTableDataLength: [],
+        //当前操作的异常信息
+        currencyAbnormalInfoId: '',
+        //异常表格分页
+        abnormalPage: 1,
+        //弹框标题
+        dialogTitleText: '',
       }
     },
     computed: {},
@@ -546,6 +575,7 @@
 
       //点击'持仓'按钮
       clickPositionBtn(row){
+        this.dialogTitleText = '持仓';
         row.loadingPositionState = true;
         this.$api.Robot.earningsDetails({id: row.order_id}).then(res => {
           if(res.data && res.data.status === 1000){
@@ -559,7 +589,11 @@
       //点击'收益'按钮
       clickEarningsBtn(row){
         row.loadingEarningsState = true;
-        this.$api.Robot.getEarnings({id: row.id}).then(res => {
+        let params = {
+          id: row.id,
+          page: this.earningsPage,
+        };
+        this.$api.Robot.getEarnings(params).then(res => {
           if(res.data && res.data.status === 1000){
             let data = res.data.data;
             this.earningsTableData = data.data;
@@ -580,6 +614,7 @@
 
       //点击收益表格里的'详情'按钮
       clickDetailsBtn(row){
+        this.dialogTitleText = '收益详情';
         this.$api.Robot.earningsDetails({id: row.id}).then(res => {
           if(res.data && res.data.status === 1000){
             let data = res.data.data;
@@ -596,7 +631,6 @@
             return false;
           }
           else{
-            console.log(this.robotObj.StopCover);
             let params = {
               stop_open_position: this.robotObj.StopCover + '',
               grid_sell_switch: (this.robotObj.GridClearance ? 1 : 0) + '',
@@ -630,14 +664,41 @@
 
       //点击异常
       clickAbnormalBtn(row){
-        this.$api.Robot.getAbnormalInfo({order_id: row.order_id}).then(res => {
+        this.currencyAbnormalInfoId = row.order_id;
+        this.getAbnormalInfoTable();
+      },
+
+      //获取异常信息表格数据
+      getAbnormalInfoTable(){
+        let params = {
+          order_id: this.currencyAbnormalInfoId,
+          page: this.abnormalPage,
+        };
+        this.$api.Robot.getAbnormalInfo(params).then(res => {
           if(res.data && res.data.status === 1000){
             let data = res.data.data;
-
+            this.abnormalTableData = data.data;
+            this.abnormalTableDataLength = data.total;
+            this.isShowAbnormalDialog = true;
           }
         });
       },
 
+      //处理异常信息
+      disposeAbnormalInfo(row){
+        this.$api.Robot.disposeAbnormalInfo({id: row.id}).then(res => {
+          if(res.data && res.data.status === 1000){
+            this.$common.successHint('处理异常信息成功');
+            this.getAbnormalInfoTable();
+          }
+        });
+      },
+
+      //异常信息表格分页
+      abnormalTableCurrentChange(val){
+        this.abnormalPage = val;
+        this.getAbnormalInfoTable();
+      },
     },
     props: {},
     watch: {},

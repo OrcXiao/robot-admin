@@ -30,15 +30,17 @@
         label="创建时间">
       </el-table-column>
       <el-table-column
-        width="220"
+        width="180"
         label="操作">
         <template slot-scope="scope">
           <el-button
+            size="mini"
             @click="clickEditBtn(scope.row)"
             icon="el-icon-edit"
             type="success">修改
           </el-button>
           <el-button
+            size="mini"
             @click="clickRemoveBtn(scope.row)"
             icon="el-icon-circle-close"
             type="danger">删除

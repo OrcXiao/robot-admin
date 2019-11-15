@@ -24,14 +24,13 @@ const globalMixins = {
     
     //关闭弹窗回调..
     Mixin_closeDialog(formName, Dialog){
+      let that = this;
       setTimeout(() => {
-        this.$nextTick(() => {
-          if(this.$refs[formName].resetFields){
-            this.$refs[formName].resetFields();
-          }
+        that.$nextTick(() => {
+          that.$refs[formName].resetFields();
         });
         if(Dialog){
-          this[Dialog] = false
+          that[Dialog] = false
         }
       }, 100)
     },
@@ -63,21 +62,21 @@ const globalMixins = {
       }
       return value
     },
-  
-  
+    
+    
     //限制数字的输入..
-    Mixin_commonLimitInput(str, before, after, state) {
+    Mixin_commonLimitInput(str, before, after, state){
       let that = this;
-      if(str.indexOf(".") >= 0) {
+      if(str.indexOf(".") >= 0){
         let attr1 = str.split(".")[0];
         let attr2 = str.split(".")[1];
         that[attr1][attr2] = that.Mixin_limitInputNum(that[attr1][attr2], before, after, state);
       }
-      else {
+      else{
         that[str] = that.Mixin_limitInputNum(that[str], before, after, state);
       }
     }
-  
+    
   }
 };
 

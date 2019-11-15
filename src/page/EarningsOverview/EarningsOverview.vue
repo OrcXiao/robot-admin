@@ -19,7 +19,7 @@
         start-placeholder="开始日期"
         end-placeholder="结束日期">
       </el-date-picker>
-      <el-button @click="initData" type="success" class="ml20">搜索</el-button>
+      <el-button @click="initData" class="ml20">搜索</el-button>
       <el-button @click="resetData" type="info" class="ml20">重置</el-button>
     </div>
     <el-table

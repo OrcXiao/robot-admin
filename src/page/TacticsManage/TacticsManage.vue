@@ -37,6 +37,7 @@
           label="操作">
           <template slot-scope="scope">
             <el-button
+              size="mini"
               @click="clickDetailsBtn(scope.row)"
               icon="el-icon-tickets"
               :loading="scope.row.loadingState"
@@ -99,11 +100,13 @@
           label="操作">
           <template slot-scope="scope">
             <el-button
+              size="mini"
               @click="clickEditBtn(scope.row)"
               icon="el-icon-edit"
               type="success">修改
             </el-button>
             <el-button
+              size="mini"
               @click="clickRemoveBtn(scope.row)"
               icon="el-icon-circle-close"
               type="danger">删除
@@ -124,8 +127,9 @@
     <el-dialog
       :title="dialogTitle"
       class="tactics-dialog-wrap"
-      @close="Mixin_closeDialog('tacticsObj', 'isShowAddTacticsDialog')"
       :visible.sync="isShowAddTacticsDialog"
+      @close="Mixin_closeDialog('tacticsObj', 'isShowAddTacticsDialog')"
+
       :width="widthVal + 'px'">
       <el-form
         :model="tacticsObj"
@@ -422,7 +426,7 @@
         customTableData: [],
         //自定义策略表格数据总数
         customTableDataLength: 0,
-        //显示自定义弹框
+        //显示添加自定义弹框
         isShowAddTacticsDialog: false,
         //网格开启或关闭条件候选项
         conditionOptions: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
@@ -612,7 +616,7 @@
         });
       },
 
-      //点击'详情'按钮
+      //点击'查看详情'按钮
       clickDetailsBtn(row){
         this.dialogTitle = '系统策略详情';
         this.currentHandle = 'systemDetails';
@@ -620,7 +624,6 @@
         this.$api.TacticsManage.tacticsDetails({id: row.id}).then(res => {
           if(res.data && res.data.status === 1000){
             let data = res.data.data;
-            console.log(data);
             this.ZhiYingBiLiArr = data.stop_profit_ratio.split(',');
             this.BuCangBiLiArr = data.make_up_ratio.split(',');
             this.BuCangShuLieArr = data.make_up_queue.split(',');
@@ -646,11 +649,33 @@
       clickAddBtn(){
         this.dialogTitle = '添加自定义策略';
         this.currentHandle = 'add';
-        this.tacticsObj = this.cloneTacticsObj;
         this.ZhiYingBiLiArr = ['', ''];
         this.BuCangBiLiArr = [''];
         this.BuCangShuLieArr = [''];
         this.WangGeZhiYingBiLiArr = [''];
+        this.tacticsObj = {
+          //策略名称
+          name: '',
+          //追踪止盈
+          TrackingCheckSurplus: false,
+          //允许回调
+          AllowTheCallback: '',
+          //横盘时间
+          SidewaysTime: '',
+          //防瀑布
+          ToPreventFalls: false,
+          //允许回调2
+          AllowTheCallback2: '',
+          //横盘时间2
+          SidewaysTime2: '',
+          //网格
+          Grid: false,
+          //开启条件
+          OpenCondition: '',
+          //关闭条件
+          CloseCondition: '',
+        };
+
         this.isShowAddTacticsDialog = true;
       },
 

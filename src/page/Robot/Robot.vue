@@ -61,28 +61,32 @@
         label="状态">
       </el-table-column>
       <el-table-column
-        width="440"
+        width="350"
         label="操作">
         <template slot-scope="scope">
           <el-button
+            size="mini"
             @click="clickEditBtn(scope.row)"
             icon="el-icon-edit"
             :loading="scope.row.loadingState"
             type="success">{{scope.row.loadingState ? '加载' : '修改'}}
           </el-button>
           <el-button
+            size="mini"
             v-if="scope.row.status === 1"
             @click="clickPauseBtn(scope.row)"
             icon="el-icon-video-pause"
             type="info">暂停
           </el-button>
           <el-button
+            size="mini"
             v-if="scope.row.status === 3"
             @click="clickStartBtn(scope.row)"
             icon="el-icon-video-play"
             type="info">启动
           </el-button>
           <el-button
+            size="mini"
             @click="clickRemoveBtn(scope.row)"
             icon="el-icon-circle-close"
             type="danger">删除
@@ -90,7 +94,7 @@
           <el-button
             @click="clickDetailsBtn(scope.row)"
             icon="el-icon-tickets"
-
+            size="mini"
             type="warning">详情
           </el-button>
         </template>
